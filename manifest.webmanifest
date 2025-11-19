@@ -1,20 +1,20 @@
 {
   "name": "Turni di lavoro",
   "short_name": "Turni",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/turni-lavoro-pwa/",
+  "scope": "/turni-lavoro-pwa/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#1976d2",
   "background_color": "#ffffff",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "/turni-lavoro-pwa/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "/turni-lavoro-pwa/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
