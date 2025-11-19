@@ -1,15 +1,25 @@
 // Chiave di salvataggio locale
 const STORAGE_KEY = "turni_calendar_v1";
 
-// Mappa: { "YYYY-MM-DD": "Mattina" | "Pomeriggio" | "Notte" | "Libero" }
+// Mappa: { "YYYY-MM-DD": "Mattina" | "Pomeriggio" | "Notte" | "Libero" | "Ferie" | "Mutua" | "PAR" | "P.S." }
 let shifts = {};
 
 // Stato mese corrente
 let currentYear;
 let currentMonth; // 0-11
 
-// Tipi di turno in ciclo
-const SHIFT_ORDER = ["", "Mattina", "Pomeriggio", "Notte", "Libero"];
+// Ordine dei tipi di turno quando tocchi la casella
+const SHIFT_ORDER = [
+  "",
+  "Mattina",
+  "Pomeriggio",
+  "Notte",
+  "Libero",
+  "Ferie",
+  "Mutua",
+  "PAR",
+  "P.S."
+];
 
 // Elementi DOM calendario
 const monthNameEl = document.getElementById("month-name");
@@ -131,13 +141,8 @@ function renderCalendar() {
   const today = new Date();
   const todayStr = formatDateKey(today);
 
-  // Riepilogo conteggio per mese
-  const monthCounts = {
-    Mattina: 0,
-    Pomeriggio: 0,
-    Notte: 0,
-    Libero: 0
-  };
+  // Riepilogo conteggio per mese (qualsiasi turno)
+  const monthCounts = {};
 
   for (let i = 0; i < totalCells; i++) {
     const cell = document.createElement("div");
@@ -179,7 +184,8 @@ function renderCalendar() {
       labelEl.textContent = shortLabel(shiftType);
       applyShiftClass(cell, shiftType);
 
-      if (inCurrentMonth && monthCounts[shiftType] != null) {
+      if (inCurrentMonth) {
+        if (!monthCounts[shiftType]) monthCounts[shiftType] = 0;
         monthCounts[shiftType]++;
       }
     }
@@ -197,13 +203,16 @@ function renderCalendar() {
     calendarGridEl.appendChild(cell);
   }
 
-  // Riepilogo mese
-  monthSummaryEl.textContent =
-    `Riepilogo mese: ` +
-    `Mattina ${monthCounts.Mattina} • ` +
-    `Pome ${monthCounts.Pomeriggio} • ` +
-    `Notte ${monthCounts.Notte} • ` +
-    `Libero ${monthCounts.Libero}`;
+  // Riepilogo mese dinamico
+  const keys = Object.keys(monthCounts);
+  if (keys.length === 0) {
+    monthSummaryEl.textContent = "Nessun turno assegnato per questo mese.";
+  } else {
+    const parts = keys.map(
+      (k) => `${shortLabel(k)} ${monthCounts[k]}`
+    );
+    monthSummaryEl.textContent = "Riepilogo mese: " + parts.join(" • ");
+  }
 }
 
 // Ruota i tipi di turno con il tocco singolo
@@ -266,8 +275,16 @@ function shortLabel(shiftType) {
       return "Notte";
     case "Libero":
       return "Libero";
+    case "Ferie":
+      return "Ferie";
+    case "Mutua":
+      return "Mutua";
+    case "PAR":
+      return "PAR";
+    case "P.S.":
+      return "P.S.";
     default:
-      return "";
+      return shiftType || "";
   }
 }
 
@@ -276,10 +293,18 @@ function applyShiftClass(cell, shiftType) {
     "shift-mattina",
     "shift-pomeriggio",
     "shift-notte",
-    "shift-libero"
+    "shift-libero",
+    "shift-ferie",
+    "shift-mutua",
+    "shift-par",
+    "shift-ps"
   );
   if (shiftType === "Mattina") cell.classList.add("shift-mattina");
   if (shiftType === "Pomeriggio") cell.classList.add("shift-pomeriggio");
   if (shiftType === "Notte") cell.classList.add("shift-notte");
   if (shiftType === "Libero") cell.classList.add("shift-libero");
+  if (shiftType === "Ferie") cell.classList.add("shift-ferie");
+  if (shiftType === "Mutua") cell.classList.add("shift-mutua");
+  if (shiftType === "PAR") cell.classList.add("shift-par");
+  if (shiftType === "P.S.") cell.classList.add("shift-ps");
 }
