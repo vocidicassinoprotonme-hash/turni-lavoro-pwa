@@ -46,31 +46,71 @@
       </div>
     </section>
 
-    <!-- CARD LEGENDA + INSERIMENTO SETTIMANALE -->
+    <!-- CARD TURNI DISPONIBILI + INSERIMENTO SETTIMANALE -->
     <section class="card">
-      <h2>Legenda turni</h2>
-      <div class="legend">
-        <div class="legend-item">
-          <span class="legend-color legend-mattina"></span>
-          <span>Mattina</span>
+      <h2>Turni disponibili</h2>
+
+      <div class="shift-types-list">
+        <div class="shift-type-item">
+          <span class="shift-type-color par"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">PAR</div>
+            <div class="shift-type-desc">PAR</div>
+          </div>
         </div>
-        <div class="legend-item">
-          <span class="legend-color legend-pomeriggio"></span>
-          <span>Pomeriggio</span>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color ferie"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Ferie</div>
+            <div class="shift-type-desc">Nuovo</div>
+          </div>
         </div>
-        <div class="legend-item">
-          <span class="legend-color legend-notte"></span>
-          <span>Notte</span>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color ps"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">P.S.</div>
+            <div class="shift-type-desc">Nuovo</div>
+          </div>
         </div>
-        <div class="legend-item">
-          <span class="legend-color legend-libero"></span>
-          <span>Libero</span>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color mutua"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Mutua</div>
+            <div class="shift-type-desc">Nuovo</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color pome"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Pome</div>
+            <div class="shift-type-desc">Pomeriggio (14:00–22:00)</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color matt"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Matt</div>
+            <div class="shift-type-desc">Mattina (06:00–14:00)</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color libero"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Libero</div>
+            <div class="shift-type-desc">Riposo</div>
+          </div>
         </div>
       </div>
 
       <p class="info-text">
         Tocca una casella del calendario per cambiare il turno di quel giorno.<br>
-        L’ordine è: <strong>vuoto → Matt → Pome → Notte → Libero → vuoto</strong>.<br>
+        L’ordine è: <strong>vuoto → Mattina → Pomeriggio → Notte → Libero → Ferie → Mutua → PAR → P.S. → vuoto</strong>.<br>
         I turni sono salvati solo sul tuo dispositivo.
       </p>
 
@@ -86,10 +126,14 @@
         <div class="week-form-row">
           <label for="week-shift">Turno da applicare per 7 giorni</label>
           <select id="week-shift">
-            <option value="Mattina">Mattina</option>
-            <option value="Pomeriggio">Pomeriggio</option>
+            <option value="Mattina">Mattina (06:00–14:00)</option>
+            <option value="Pomeriggio">Pomeriggio (14:00–22:00)</option>
             <option value="Notte">Notte</option>
-            <option value="Libero">Libero</option>
+            <option value="Libero">Riposo</option>
+            <option value="Ferie">Ferie</option>
+            <option value="Mutua">Mutua</option>
+            <option value="PAR">PAR</option>
+            <option value="P.S.">P.S.</option>
           </select>
         </div>
 
@@ -101,7 +145,7 @@
 
         <p class="info-text small">
           Verrà impostato lo stesso turno per 7 giorni consecutivi
-          dalla data scelta.
+          dalla data scelta (anche se passa al mese successivo).
         </p>
       </form>
     </section>
