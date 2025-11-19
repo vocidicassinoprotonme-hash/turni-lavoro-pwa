@@ -16,6 +16,8 @@ body {
   flex-direction: column;
 }
 
+/* HEADER */
+
 .app-header {
   background: linear-gradient(135deg, #1976d2, #1565c0);
   color: #ffffff;
@@ -33,6 +35,8 @@ body {
   font-size: 0.9rem;
   opacity: 0.93;
 }
+
+/* LAYOUT PRINCIPALE */
 
 .app-main {
   flex: 1;
@@ -57,7 +61,13 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* Navigazione mese */
+.sub-title {
+  font-size: 0.95rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+/* NAVIGAZIONE MESE */
 
 .month-nav {
   display: flex;
@@ -101,7 +111,7 @@ body {
   color: #6b7280;
 }
 
-/* Intestazione giorni settimana */
+/* INTESTAZIONE GIORNI SETTIMANA */
 
 .weekdays-row {
   display: grid;
@@ -114,7 +124,7 @@ body {
   margin-bottom: 0.2rem;
 }
 
-/* Calendario */
+/* CALENDARIO */
 
 .calendar-grid {
   display: grid;
@@ -151,7 +161,7 @@ body {
   margin-top: 0.2rem;
 }
 
-/* Evidenziazione oggi */
+/* OGGI */
 
 .day-cell.today .day-number {
   background: #ffffff;
@@ -160,41 +170,7 @@ body {
   border: 1px solid #2563eb;
 }
 
-/* Colori turni sul calendario */
-
-.shift-mattina {
-  background: #f9c5d9;
-}
-
-.shift-pomeriggio {
-  background: #fdc9a8;
-}
-
-.shift-notte {
-  background: #e0c8ff;
-}
-
-.shift-libero {
-  background: #cdecc4;
-}
-
-.shift-ferie {
-  background: #e5c0ff;
-}
-
-.shift-mutua {
-  background: #bae6fd;
-}
-
-.shift-par {
-  background: #c7d2fe;
-}
-
-.shift-ps {
-  background: #bbf7d0;
-}
-
-/* Riepilogo mese */
+/* RIEPILOGO MESE */
 
 .month-summary {
   margin-top: 0.4rem;
@@ -202,77 +178,91 @@ body {
   color: #374151;
 }
 
-/* Lista turni disponibili */
+/* LISTA TURNI DISPONIBILI */
 
 .shift-types-list {
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 0.4rem;
+  gap: 0.35rem;
 }
 
 .shift-type-item {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.35rem 0.4rem;
+  gap: 0.6rem;
+  padding: 0.35rem 0.45rem;
   border-radius: 0.6rem;
   background: #f9fafb;
   border: 1px solid #e5e7eb;
 }
 
-.shift-type-color {
-  width: 32px;
-  height: 32px;
-  border-radius: 0.9rem;
+.shift-type-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #111827;
 }
 
-.shift-type-color.par {
-  background: #1e3a8a;
-  color: white;
-}
-
-.shift-type-color.ferie {
-  background: #8b5cf6;
-}
-
-.shift-type-color.ps {
-  background: #16a34a;
-}
-
-.shift-type-color.mutua {
-  background: #38bdf8;
-}
-
-.shift-type-color.pome {
-  background: #fdc9a8;
-}
-
-.shift-type-color.matt {
-  background: #f9c5d9;
-}
-
-.shift-type-color.libero {
-  background: #cdecc4;
-}
-
-.shift-type-text {
+.shift-type-info {
   display: flex;
   flex-direction: column;
-  gap: 0.05rem;
+  font-size: 0.8rem;
 }
 
 .shift-type-name {
-  font-size: 0.9rem;
   font-weight: 600;
 }
 
-.shift-type-desc {
-  font-size: 0.8rem;
-  color: #4b5563;
+.shift-type-hours {
+  color: #6b7280;
 }
 
-/* Form inserimento settimanale */
+/* FORM NUOVO TURNO */
+
+.shift-type-form {
+  margin-top: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.shift-type-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+}
+
+.shift-type-row label {
+  color: #374151;
+}
+
+.shift-type-row input {
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.45rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  background: #f9fafb;
+}
+
+.shift-type-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  background: #ffffff;
+}
+
+.shift-type-actions {
+  margin-top: 0.1rem;
+}
+
+/* FORM SETTIMANA */
 
 .week-form {
   margin-top: 0.4rem;
@@ -313,7 +303,7 @@ body {
   margin-top: 0.15rem;
 }
 
-/* Bottoni generici */
+/* BOTTONI */
 
 .btn {
   border: none;
@@ -338,10 +328,26 @@ body {
   background: #1565c0;
 }
 
+.btn.secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
 .btn:active {
   transform: translateY(1px);
   box-shadow: none;
 }
+
+/* BOTTONI BACKUP */
+
+.backup-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+/* TESTI INFO */
 
 .info-text {
   font-size: 0.8rem;
@@ -354,11 +360,15 @@ body {
   font-size: 0.75rem;
 }
 
+/* DIVISORE */
+
 .divider {
   border: none;
   border-top: 1px solid #e5e7eb;
   margin: 0.6rem 0;
 }
+
+/* FOOTER */
 
 .app-footer {
   padding: 0.6rem 1rem 0.9rem;
@@ -367,7 +377,17 @@ body {
   color: #6b7280;
 }
 
-/* Layout più largo su desktop */
+/* CANVAS GRAFICO */
+
+#month-chart {
+  margin-top: 0.3rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+/* LAYOUT DESKTOP */
 
 @media (min-width: 860px) {
   .app-main {
