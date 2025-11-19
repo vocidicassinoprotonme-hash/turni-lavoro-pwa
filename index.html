@@ -1,199 +1,173 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <title>Turni di lavoro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#1976d2" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turni di lavoro</title>
 
-  <!-- Stile -->
-  <link rel="stylesheet" href="./styles.css" />
+    <!-- Manifest -->
+    <link rel="manifest" href="/turni-lavoro-pwa/manifest.webmanifest">
 
-  <!-- Manifest PWA - percorso assoluto per GitHub Pages -->
-  <link rel="manifest" href="/turni-lavoro-pwa/manifest.webmanifest" />
+    <!-- Icon -->
+    <link rel="icon" type="image/png" href="/turni-lavoro-pwa/icons/icon-192.png">
 
-  <!-- Icone App (favicon + apple) -->
-  <link rel="icon" type="image/png" sizes="192x192" href="/turni-lavoro-pwa/icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="/turni-lavoro-pwa/icons/icon-192.png" />
+    <!-- Stili -->
+    <link rel="stylesheet" href="styles.css">
+
 </head>
-
 <body>
-  <header class="app-header">
-    <h1>Turni di lavoro</h1>
-    <p class="subtitle">Calendario turni personale</p>
-  </header>
 
-  <main class="app-main">
-    <!-- TAB NAV -->
-    <div class="tabs">
-      <button class="tab-btn active" data-page="calendar">Calendario</button>
-      <button class="tab-btn" data-page="settings">Impostazioni</button>
+    <header class="main-header">
+        <h1>Turni di lavoro</h1>
+        <p>Calendario turni personale</p>
+
+        <div class="tabs">
+            <button id="tab-cal" class="active">Calendario</button>
+            <button id="tab-settings">Impostazioni</button>
+        </div>
+    </header>
+
+
+    <!-- PAGINA CALENDARIO -->
+    <main id="page-calendario">
+
+        <section class="calendar-card">
+
+            <div class="month-nav">
+                <button id="prev-month" class="nav-btn">❮</button>
+                <div class="month-label">
+                    <span id="month-name"></span>
+                    <span id="year-number"></span>
+                </div>
+                <button id="next-month" class="nav-btn">❯</button>
+            </div>
+
+            <div class="weekdays-row">
+                <div>LUN</div>
+                <div>MAR</div>
+                <div>MER</div>
+                <div>GIO</div>
+                <div>VEN</div>
+                <div>SAB</div>
+                <div>DOM</div>
+            </div>
+
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- celle create da app.js -->
+            </div>
+
+        </section>
+
+
+        <section class="card">
+            <h2>Inserimento settimanale</h2>
+
+            <form id="week-form">
+                <label>Data inizio settimana</label>
+                <input type="date" id="week-start">
+
+                <label>Turno da applicare (7 giorni)</label>
+                <select id="week-shift"></select>
+
+                <button type="submit" class="btn-primary">Applica alla settimana</button>
+            </form>
+        </section>
+
+
+        <section class="card">
+            <h2>Riepilogo ore & grafico</h2>
+            <p id="hours-summary"></p>
+            <canvas id="month-chart" width="380" height="180"></canvas>
+        </section>
+
+    </main>
+
+
+
+    <!-- PAGINA IMPOSTAZIONI -->
+    <main id="page-settings" style="display:none;">
+
+        <section class="card">
+            <h2>Turni disponibili</h2>
+            <div id="shift-types-list"></div>
+        </section>
+
+        <section class="card">
+            <h2>Crea un nuovo turno</h2>
+
+            <form id="shift-type-form">
+
+                <label>Sigla breve</label>
+                <input id="shift-short" placeholder="Es. Matt">
+
+                <label>Nome turno</label>
+                <input id="shift-name" placeholder="Es. Mattina">
+
+                <label>Orario</label>
+                <input id="shift-hours" placeholder="Es. 06:00-14:00">
+
+                <label>Colore</label>
+                <input type="color" id="shift-color" value="#ff9999">
+
+                <button type="submit" class="btn-secondary">Aggiungi turno</button>
+            </form>
+        </section>
+
+
+        <section class="card">
+            <h2>Backup & PDF</h2>
+
+            <button id="export-json" class="btn-secondary">Esporta backup</button>
+            <button id="import-json-btn" class="btn-secondary">Importa backup</button>
+            <input type="file" id="import-json-file" accept="application/json" hidden>
+
+            <button id="print-pdf" class="btn-primary">Stampa/Salva PDF</button>
+        </section>
+
+
+        <section class="card">
+            <h2>Calcolo guadagni</h2>
+
+            <label>Retribuzione oraria (€)</label>
+            <input id="hourly-rate" type="number" value="12.99">
+
+            <label>Ore manuali (opzionale)</label>
+            <input id="manual-hours" type="number" placeholder="0">
+
+            <button id="calc-pay" class="btn-primary">Calcola guadagni</button>
+
+            <p id="pay-result"></p>
+        </section>
+
+    </main>
+
+
+
+
+    <!-- POPUP NOTA GIORNO -->
+    <div id="note-popup" class="popup hidden">
+
+        <div class="popup-content">
+            <h3>Nota del giorno</h3>
+
+            <label>Titolo</label>
+            <input id="note-title">
+
+            <label>Dettagli</label>
+            <textarea id="note-text"></textarea>
+
+            <div class="popup-buttons">
+                <button id="popup-cancel" class="btn-secondary">Annulla</button>
+                <button id="popup-delete" class="btn-secondary">Elimina</button>
+                <button id="popup-save" class="btn-primary">Salva</button>
+            </div>
+        </div>
+
     </div>
 
-    <!-- PAGINA 1: CALENDARIO + SETTIMANA + GRAFICO -->
-    <div id="page-calendar" class="page active">
-      <!-- CARD CALENDARIO -->
-      <section class="card">
-        <div class="month-nav">
-          <button id="prev-month" class="nav-btn">&#10094;</button>
-          <div class="month-label">
-            <span id="month-name"></span>
-            <span id="year-number"></span>
-          </div>
-          <button id="next-month" class="nav-btn">&#10095;</button>
-        </div>
 
-        <div class="weekdays-row">
-          <div>LUN</div>
-          <div>MAR</div>
-          <div>MER</div>
-          <div>GIO</div>
-          <div>VEN</div>
-          <div>SAB</div>
-          <div>DOM</div>
-        </div>
 
-        <div id="calendar-grid" class="calendar-grid">
-          <!-- celle generate da app.js -->
-        </div>
+    <script src="app.js"></script>
 
-        <div id="month-summary" class="month-summary"></div>
-      </section>
-
-      <!-- CARD INSERIMENTO SETTIMANA + GRAFICO -->
-      <section class="card">
-        <h2>Inserimento settimanale</h2>
-        <form id="week-form" class="week-form">
-          <div class="week-form-row">
-            <label for="week-start">Data di inizio settimana</label>
-            <input type="date" id="week-start" />
-          </div>
-
-          <div class="week-form-row">
-            <label for="week-shift">Turno da applicare (7 giorni)</label>
-            <select id="week-shift"></select>
-          </div>
-
-          <div class="week-form-actions">
-            <button type="submit" class="btn primary">Applica alla settimana</button>
-          </div>
-        </form>
-
-        <hr class="divider" />
-
-        <h2>Riepilogo ore & grafico</h2>
-        <div id="hours-summary" class="info-text"></div>
-        <canvas id="month-chart" width="380" height="180"></canvas>
-      </section>
-    </div>
-
-    <!-- PAGINA 2: IMPOSTAZIONI / TURNI / GUADAGNI -->
-    <div id="page-settings" class="page">
-      <section class="card">
-        <h2>Turni disponibili</h2>
-
-        <div id="shift-types-list" class="shift-types-list">
-          <!-- elenco turni generato da app.js -->
-        </div>
-
-        <h3 class="sub-title">Crea un nuovo turno</h3>
-        <form id="shift-type-form" class="shift-type-form">
-          <div class="shift-type-row">
-            <label for="shift-short">Sigla breve (es. Matt, Pome, PAR)</label>
-            <input id="shift-short" maxlength="6" />
-          </div>
-          <div class="shift-type-row">
-            <label for="shift-name">Nome turno</label>
-            <input id="shift-name" placeholder="Es. Mattina, Ferie, Mutua" />
-          </div>
-          <div class="shift-type-row">
-            <label for="shift-hours">Orario (facoltativo)</label>
-            <input id="shift-hours" placeholder="Es. 06:00-14:00" />
-          </div>
-          <div class="shift-type-row">
-            <label for="shift-color">Colore</label>
-            <input type="color" id="shift-color" value="#f97373" />
-          </div>
-          <div class="shift-type-actions">
-            <button type="submit" class="btn secondary">Aggiungi turno</button>
-          </div>
-        </form>
-
-        <p class="info-text">
-          Tocca una casella del calendario (nella pagina Calendario) per modificare il turno del giorno e aggiungere una nota evento.
-        </p>
-
-        <hr class="divider" />
-
-        <h2>Backup & PDF calendario</h2>
-        <div class="backup-buttons">
-          <button id="export-json" class="btn secondary">Esporta backup (.json)</button>
-          <button id="import-json-btn" class="btn secondary">Importa backup</button>
-          <input type="file" id="import-json-file" accept="application/json" hidden />
-        </div>
-        <div class="backup-buttons">
-          <button id="print-pdf" class="btn primary">Stampa / Salva PDF mese</button>
-        </div>
-
-        <hr class="divider" />
-
-        <h2>Guadagni (da busta paga)</h2>
-        <div class="earnings-section">
-          <div class="earn-row">
-            <label for="hourly-pay">Retribuzione oraria (€ / h)</label>
-            <input type="number" id="hourly-pay" min="0" step="0.01" />
-          </div>
-          <div class="earn-row">
-            <label for="payroll-pdf">Carica PDF busta paga</label>
-            <input type="file" id="payroll-pdf" accept="application/pdf" />
-          </div>
-          <p class="info-text small">
-            Il PDF deve essere il modello standard (come quello che hai caricato): l'app legge le righe
-            “Ore Retribuite” e “Ore Lavorate Ecc.” e calcola le ore totali e il guadagno stimato.
-          </p>
-          <div id="earnings-summary" class="earnings-summary info-text"></div>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <footer class="app-footer">
-    Turni di lavoro • PWA personale
-  </footer>
-
-  <!-- pdf.js per lettura busta paga -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <!-- JS principale -->
-  <script src="./app.js"></script>
-
-  <!-- MODALE GIORNO (note + turno) -->
-  <div id="day-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header-title" id="day-modal-date"></div>
-      <div class="modal-header-sub">
-        Imposta il turno del giorno e aggiungi una nota evento.
-      </div>
-
-      <div class="modal-row">
-        <label for="day-modal-shift">Turno</label>
-        <select id="day-modal-shift"></select>
-      </div>
-
-      <div class="modal-row">
-        <label for="day-modal-title">Titolo nota (mostrato sul calendario)</label>
-        <input id="day-modal-title" maxlength="40" />
-      </div>
-
-      <div class="modal-row">
-        <label for="day-modal-text">Dettagli (facoltativi)</label>
-        <textarea id="day-modal-text" placeholder="Es. visita medica, permesso, straordinario..."></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button id="day-modal-cancel" class="btn ghost">Annulla</button>
-        <button id="day-modal-save" class="btn primary">Salva</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
