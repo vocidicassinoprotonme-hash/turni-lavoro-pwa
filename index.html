@@ -2,7 +2,8 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Turni di lavoro</title>
 
     <!-- Manifest -->
@@ -71,7 +72,7 @@
         <section class="card">
             <h2>Riepilogo ore & grafico</h2>
             <p id="hours-summary"></p>
-            <canvas id="month-chart" width="380" height="180"></canvas>
+            <canvas id="month-chart" width="360" height="180"></canvas>
         </section>
 
     </main>
@@ -124,6 +125,15 @@
 
             <label>Ore contrattuali mese</label>
             <input id="contract-hours" type="number" value="173">
+
+            <label>Maggiorazione 2° turno (%)</label>
+            <input id="bonus-second" type="number" step="0.1" value="20.7">
+
+            <label>Maggiorazione 3° turno (%)</label>
+            <input id="bonus-third" type="number" step="0.1" value="30">
+
+            <label>Trattenute complessive (INPS, IRPEF, ecc.) (%)</label>
+            <input id="deductions-perc" type="number" step="0.1" value="30">
 
             <label>Ore manuali (opzionale)</label>
             <input id="manual-hours" type="number" placeholder="Es. 173">
