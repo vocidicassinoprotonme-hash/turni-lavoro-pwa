@@ -1,7 +1,8 @@
 {
   "name": "Turni di lavoro",
   "short_name": "Turni",
-  "start_url": "./index.html",
+  "start_url": "/turni-lavoro-pwa/",
+  "scope": "/turni-lavoro-pwa/",
   "display": "standalone",
   "theme_color": "#1976d2",
   "background_color": "#ffffff",
