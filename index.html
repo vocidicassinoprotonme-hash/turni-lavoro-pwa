@@ -9,78 +9,73 @@
   <link rel="stylesheet" href="./styles.css" />
   <link rel="manifest" href="./manifest.webmanifest" />
 </head>
-
 <body>
   <header class="app-header">
     <h1>Turni di lavoro</h1>
-    <p class="subtitle">Gestione turni semplice e veloce</p>
+    <p class="subtitle">Calendario turni personale</p>
   </header>
 
   <main class="app-main">
     <section class="card">
-      <h2>Aggiungi o modifica turno</h2>
-
-      <form id="shift-form">
-        <input type="hidden" id="shift-id" />
-
-        <div class="form-row">
-          <label>Data</label>
-          <input type="date" id="date" required />
+      <div class="month-nav">
+        <button id="prev-month" class="nav-btn">&#10094;</button>
+        <div class="month-label">
+          <span id="month-name"></span>
+          <span id="year-number"></span>
         </div>
+        <button id="next-month" class="nav-btn">&#10095;</button>
+      </div>
 
-        <div class="form-row">
-          <label>Ora inizio</label>
-          <input type="time" id="start" required />
-        </div>
+      <div class="weekdays-row">
+        <div>LUN</div>
+        <div>MAR</div>
+        <div>MER</div>
+        <div>GIO</div>
+        <div>VEN</div>
+        <div>SAB</div>
+        <div>DOM</div>
+      </div>
 
-        <div class="form-row">
-          <label>Ora fine</label>
-          <input type="time" id="end" required />
-        </div>
+      <div id="calendar-grid" class="calendar-grid">
+        <!-- celle generate da app.js -->
+      </div>
 
-        <div class="form-row">
-          <label>Tipo turno</label>
-          <select id="type">
-            <option value="Mattina">Mattina</option>
-            <option value="Pomeriggio">Pomeriggio</option>
-            <option value="Notte">Notte</option>
-            <option value="Straordinario">Straordinario</option>
-          </select>
-        </div>
-
-        <div class="form-row">
-          <label>Note (opzionali)</label>
-          <textarea id="notes" rows="2"></textarea>
-        </div>
-
-        <div class="buttons-row">
-          <button class="btn primary" type="submit">Salva turno</button>
-          <button class="btn secondary" type="button" id="reset-btn">Pulisci</button>
-        </div>
-      </form>
+      <div id="month-summary" class="month-summary">
+        <!-- riepilogo turni mese -->
+      </div>
     </section>
 
     <section class="card">
-      <div class="list-header">
-        <h2>Turni registrati</h2>
-        <button class="btn danger small" id="clear-all">Cancella tutti</button>
+      <h2>Legenda turni</h2>
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-color legend-mattina"></span>
+          <span>Mattina</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color legend-pomeriggio"></span>
+          <span>Pomeriggio</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color legend-notte"></span>
+          <span>Notte</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color legend-libero"></span>
+          <span>Libero</span>
+        </div>
       </div>
 
-      <div class="info-text">
-        I turni sono salvati in locale nel tuo dispositivo.
-      </div>
-
-      <ul id="shifts-list" class="shifts-list"></ul>
-
-      <div id="empty-message" class="empty-message">
-        Nessun turno inserito.<br>
-        Aggiungi un turno con il modulo sopra.
-      </div>
+      <p class="info-text">
+        Tocca una casella del calendario per cambiare il turno di quel giorno.<br>
+        L’ordine è: <strong>vuoto → Matt → Pome → Notte → Libero → vuoto</strong>.<br>
+        I turni sono salvati solo sul tuo dispositivo.
+      </p>
     </section>
   </main>
 
   <footer class="app-footer">
-    Turni di lavoro © 2025
+    Turni di lavoro • PWA personale
   </footer>
 
   <script src="./app.js"></script>
