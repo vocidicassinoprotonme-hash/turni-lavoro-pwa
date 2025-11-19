@@ -201,6 +201,21 @@ body {
   margin-top: 0.2rem;
 }
 
+/* NOTA TITOLO NEL GIORNO */
+
+.day-note-title {
+  margin-top: 2px;
+  font-size: 0.7rem;
+  color: #111827;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 0.5rem;
+  padding: 1px 4px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* OGGI */
 
 .day-cell.today .day-number {
@@ -373,6 +388,12 @@ body {
   color: #111827;
 }
 
+.btn.ghost {
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+}
+
 .btn:active {
   transform: translateY(1px);
   box-shadow: none;
@@ -425,6 +446,126 @@ body {
   border-radius: 0.5rem;
   background: #f9fafb;
   border: 1px solid #e5e7eb;
+}
+
+/* SEZIONE GUADAGNI */
+
+.earnings-section {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.earn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+}
+
+.earn-row label {
+  color: #374151;
+}
+
+.earn-row input[type="number"],
+.earn-row input[type="file"] {
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  background: #f9fafb;
+}
+
+.earn-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  background: #ffffff;
+}
+
+.earnings-summary {
+  margin-top: 0.15rem;
+}
+
+/* MODALE GIORNO */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-card {
+  background: #ffffff;
+  border-radius: 0.9rem;
+  padding: 0.9rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+}
+
+.modal-header-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.modal-header-sub {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.4rem;
+}
+
+.modal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.modal-row label {
+  color: #374151;
+}
+
+.modal-row input,
+.modal-row select,
+.modal-row textarea {
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  background: #f9fafb;
+}
+
+.modal-row textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.modal-row input:focus,
+.modal-row select:focus,
+.modal-row textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  background: #ffffff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
 }
 
 /* LAYOUT DESKTOP: affianca le card nella pagina attiva */
