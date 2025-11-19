@@ -52,79 +52,45 @@
       <div id="month-summary" class="month-summary"></div>
     </section>
 
-    <!-- CARD TURNI DISPONIBILI + SETTIMANA -->
+    <!-- CARD LATERALE: turni, settimana, backup, riepilogo -->
     <section class="card">
       <h2>Turni disponibili</h2>
 
-      <div class="shift-types-list">
-
-        <div class="shift-type-item">
-          <span class="shift-type-color par"></span>
-          <div class="shift-type-text">
-            <div class="shift-type-name">PAR</div>
-            <div class="shift-type-desc">PAR</div>
-          </div>
-        </div>
-
-        <div class="shift-type-item">
-          <span class="shift-type-color ferie"></span>
-          <div class="shift-type-text">
-            <div class="shift-type-name">Ferie</div>
-            <div class="shift-type-desc">Nuovo</div>
-          </div>
-        </div>
-
-        <div class="shift-type-item">
-          <span class="shift-type-color ps"></span>
-          <div class="shift-type-text">
-            <div class="shift-type-name">P.S.</div>
-            <div class="shift-type-desc">Nuovo</div>
-          </div>
-        </div>
-
-        <div class="shift-type-item">
-          <span class="shift-type-color mutua"></span>
-          <div class="shift-type-text">
-            <div class="shift-type-name">Mutua</div>
-            <div class="shift-type-desc">Nuovo</div>
-          </div>
-        </div>
-
-        <div class="shift-type-item">
-          <span class="shift-type-color pome"></span>
-          <div class="shift-type-text">
-            <div class="shift-type-name">Pome</div>
-            <div class="shift-type-desc">Pomeriggio (14:00–22:00)</div>
-          </div>
-        </div>
-
-        <div class="shift-type-item">
-          <span class="shift-type-color matt"></span>
-          <div class="shift-type-text">
-            <div class="shift-type-name">Matt</div>
-            <div class="shift-type-desc">Mattina (06:00–14:00)</div>
-          </div>
-        </div>
-
-        <div class="shift-type-item">
-          <span class="shift-type-color libero"></span>
-          <div class="shift-type-text">
-            <div class="shift-type-name">Libero</div>
-            <div class="shift-type-desc">Riposo</div>
-          </div>
-        </div>
-
+      <div id="shift-types-list" class="shift-types-list">
+        <!-- elenco turni generato da app.js -->
       </div>
 
+      <h3 class="sub-title">Crea un nuovo turno</h3>
+      <form id="shift-type-form" class="shift-type-form">
+        <div class="shift-type-row">
+          <label for="shift-short">Sigla breve (es. Matt, Pome, PAR)</label>
+          <input id="shift-short" maxlength="6" />
+        </div>
+        <div class="shift-type-row">
+          <label for="shift-name">Nome turno</label>
+          <input id="shift-name" placeholder="Es. Mattina, Ferie, Mutua" />
+        </div>
+        <div class="shift-type-row">
+          <label for="shift-hours">Orario (facoltativo)</label>
+          <input id="shift-hours" placeholder="Es. 06:00-14:00" />
+        </div>
+        <div class="shift-type-row">
+          <label for="shift-color">Colore</label>
+          <input type="color" id="shift-color" value="#f97373" />
+        </div>
+        <div class="shift-type-actions">
+          <button type="submit" class="btn secondary">Aggiungi turno</button>
+        </div>
+      </form>
+
       <p class="info-text">
-        Tocca una casella del calendario per cambiare il turno.<br>
-        Sequenza: <strong>vuoto → Matt → Pome → Notte → Libero → Ferie → Mutua → PAR → P.S. → vuoto</strong>.
+        Tocca una casella del calendario per cambiare il turno del giorno.
+        La rotazione segue l'ordine dei turni in elenco.
       </p>
 
       <hr class="divider" />
 
       <h2>Inserimento settimanale</h2>
-
       <form id="week-form" class="week-form">
         <div class="week-form-row">
           <label for="week-start">Data di inizio settimana</label>
@@ -132,17 +98,8 @@
         </div>
 
         <div class="week-form-row">
-          <label for="week-shift">Turno da applicare</label>
-          <select id="week-shift">
-            <option value="Mattina">Mattina (06:00–14:00)</option>
-            <option value="Pomeriggio">Pomeriggio (14:00–22:00)</option>
-            <option value="Notte">Notte</option>
-            <option value="Libero">Riposo</option>
-            <option value="Ferie">Ferie</option>
-            <option value="Mutua">Mutua</option>
-            <option value="PAR">PAR</option>
-            <option value="P.S.">P.S.</option>
-          </select>
+          <label for="week-shift">Turno da applicare (7 giorni)</label>
+          <select id="week-shift"></select>
         </div>
 
         <div class="week-form-actions">
@@ -150,6 +107,23 @@
         </div>
       </form>
 
+      <hr class="divider" />
+
+      <h2>Backup & PDF</h2>
+      <div class="backup-buttons">
+        <button id="export-json" class="btn secondary">Esporta backup (.json)</button>
+        <button id="import-json-btn" class="btn secondary">Importa backup</button>
+        <input type="file" id="import-json-file" accept="application/json" hidden />
+      </div>
+      <div class="backup-buttons">
+        <button id="print-pdf" class="btn primary">Stampa / Salva PDF mese</button>
+      </div>
+
+      <hr class="divider" />
+
+      <h2>Riepilogo ore & grafico</h2>
+      <div id="hours-summary" class="info-text"></div>
+      <canvas id="month-chart" width="380" height="180"></canvas>
     </section>
   </main>
 
