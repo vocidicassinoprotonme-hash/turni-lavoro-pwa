@@ -11,12 +11,18 @@ let currentMonth; // 0-11
 // Tipi di turno in ciclo
 const SHIFT_ORDER = ["", "Mattina", "Pomeriggio", "Notte", "Libero"];
 
-// Elementi DOM
+// Elementi DOM calendario
 const monthNameEl = document.getElementById("month-name");
 const yearNumberEl = document.getElementById("year-number");
 const calendarGridEl = document.getElementById("calendar-grid");
 const monthSummaryEl = document.getElementById("month-summary");
 
+// Elementi DOM inserimento settimanale
+const weekForm = document.getElementById("week-form");
+const weekStartEl = document.getElementById("week-start");
+const weekShiftEl = document.getElementById("week-shift");
+
+// Pulsanti mese
 document.getElementById("prev-month").addEventListener("click", () => {
   changeMonth(-1);
 });
@@ -32,6 +38,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const today = new Date();
   currentYear = today.getFullYear();
   currentMonth = today.getMonth();
+
+  // Precompila la data inizio settimana con oggi
+  if (weekStartEl) {
+    weekStartEl.value = formatDateKey(today);
+  }
+
+  // Gestione invio form settimanale
+  if (weekForm) {
+    weekForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      applyWeekShifts();
+    });
+  }
+
+  // Registra service worker se presente
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  }
 
   renderCalendar();
 });
@@ -98,9 +122,8 @@ function renderCalendar() {
   calendarGridEl.innerHTML = "";
 
   const firstDay = new Date(currentYear, currentMonth, 1);
-  const firstWeekday = (firstDay.getDay() + 6) % 7; // converti: Lun=0 ... Dom=6
+  const firstWeekday = (firstDay.getDay() + 6) % 7; // Lun=0 ... Dom=6
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
   const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
 
   const totalCells = 42; // 6 righe x 7 colonne
@@ -183,7 +206,7 @@ function renderCalendar() {
     `Libero ${monthCounts.Libero}`;
 }
 
-// Ruota i tipi di turno con il tocco
+// Ruota i tipi di turno con il tocco singolo
 
 function cycleShift(dateKey) {
   const currentType = shifts[dateKey] || "";
@@ -194,6 +217,30 @@ function cycleShift(dateKey) {
     delete shifts[dateKey];
   } else {
     shifts[dateKey] = nextType;
+  }
+
+  saveShifts();
+  renderCalendar();
+}
+
+// Inserimento settimanale (7 giorni consecutivi)
+
+function applyWeekShifts() {
+  const startStr = weekStartEl.value;
+  const shiftType = weekShiftEl.value;
+
+  if (!startStr || !shiftType) {
+    alert("Seleziona una data di inizio e un tipo di turno.");
+    return;
+  }
+
+  const startDate = new Date(startStr);
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const key = formatDateKey(d);
+    shifts[key] = shiftType;
   }
 
   saveShifts();
