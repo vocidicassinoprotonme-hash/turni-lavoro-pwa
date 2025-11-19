@@ -3,6 +3,7 @@ const STORAGE_SHIFTS = "turni_calendar_v1";
 const STORAGE_TYPES = "turni_shift_types_v1";
 const STORAGE_NOTES = "turni_notes_v1";
 const STORAGE_RATE = "turni_hourly_rate_v1";
+const STORAGE_CONTRACT_HOURS = "turni_contract_hours_v1";
 
 // ====== STATO ======
 let shifts = {};      // { "YYYY-MM-DD": "ID_TURNO" }
@@ -13,6 +14,7 @@ let SHIFT_ORDER = [""];  // primo valore "vuoto" = nessun turno
 let currentYear;
 let currentMonth;
 let currentNoteDate = null;
+let currentCalendarHours = 0; // ore mese dal calendario
 
 // Icone per i turni
 const SHIFT_ICONS = {
@@ -62,7 +64,9 @@ const importFileInput = document.getElementById("import-json-file");
 const printPdfBtn = document.getElementById("print-pdf");
 
 const hourlyRateEl = document.getElementById("hourly-rate");
+const contractHoursEl = document.getElementById("contract-hours");
 const manualHoursEl = document.getElementById("manual-hours");
+const calendarHoursInfoEl = document.getElementById("calendar-hours-info");
 const calcPayBtn = document.getElementById("calc-pay");
 const payResultEl = document.getElementById("pay-result");
 
@@ -90,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadShifts();
     loadNotes();
     loadRate();
+    loadContractHours();
 
     // Data iniziale = oggi
     const today = new Date();
@@ -148,14 +153,14 @@ function switchPage(which) {
 // ====== SHIFT TYPES ======
 function getDefaultShiftTypes() {
     return [
-        { id: "MATT", short: "Matt", name: "Mattina",   hours: "06:00-14:00", color: "#ff8f8f" },
-        { id: "POME", short: "Pome", name: "Pomeriggio",hours: "14:00-22:00", color: "#ffb36b" },
-        { id: "NOTTE",short: "Notte",name: "Notte",     hours: "22:00-06:00", color: "#7f8cff" },
-        { id: "LIB",  short: "Libero",name:"Riposo",    hours: "",            color: "#7fd49b" },
-        { id: "FER",  short: "Ferie", name:"Ferie",     hours: "",            color: "#d78cff" },
-        { id: "MUT",  short: "Mutua", name:"Mutua",     hours: "",            color: "#8fd1ff" },
-        { id: "PAR",  short: "PAR",   name:"PAR",       hours: "",            color: "#aecbff" },
-        { id: "PS",   short: "P.S.",  name:"P.S.",      hours: "",            color: "#b6f5c2" }
+        { id: "MATT",  short: "Matt",   name: "Mattina",    hours: "06:00-14:00", color: "#ff8f8f" },
+        { id: "POME",  short: "Pome",   name: "Pomeriggio", hours: "14:00-22:00", color: "#ffb36b" },
+        { id: "NOTTE", short: "Notte",  name: "Notte",      hours: "22:00-06:00", color: "#7f8cff" },
+        { id: "LIB",   short: "Libero", name: "Riposo",     hours: "",            color: "#7fd49b" },
+        { id: "FER",   short: "Ferie",  name: "Ferie",      hours: "",            color: "#d78cff" },
+        { id: "MUT",   short: "Mutua",  name: "Mutua",      hours: "",            color: "#8fd1ff" },
+        { id: "PAR",   short: "PAR",    name: "PAR",        hours: "",            color: "#aecbff" },
+        { id: "PS",    short: "P.S.",   name: "P.S.",       hours: "",            color: "#b6f5c2" }
     ];
 }
 
@@ -318,9 +323,7 @@ function renderCalendar() {
 
     const totalCells = firstWeekday + daysInMonth;
     for (let i = 0; i < totalCells; i++) {
-
         if (i < firstWeekday) {
-            // celle vuote all'inizio
             const empty = document.createElement("div");
             empty.className = "day";
             empty.style.visibility = "hidden";
@@ -345,7 +348,6 @@ function renderCalendar() {
             numberEl.style.padding = "0 4px";
         }
 
-        // Turno
         const shiftId = shifts[dateKey];
         const type = shiftId ? findShiftType(shiftId) : null;
         let badgeEl = null;
@@ -361,7 +363,6 @@ function renderCalendar() {
             dayCounts[shiftId]++;
         }
 
-        // Nota
         const noteInfo = notes[dateKey];
         let titleEl = null;
         if (noteInfo && noteInfo.title) {
@@ -370,7 +371,6 @@ function renderCalendar() {
             titleEl.textContent = noteInfo.title;
         }
 
-        // Bottone nota
         const noteBtn = document.createElement("div");
         noteBtn.className = "note-btn";
         noteBtn.textContent = "📝";
@@ -379,7 +379,6 @@ function renderCalendar() {
             openNotePopup(dateKey);
         });
 
-        // Click cella = ruota turno
         div.addEventListener("click", () => {
             cycleShift(dateKey);
         });
@@ -391,16 +390,17 @@ function renderCalendar() {
         calendarGridEl.appendChild(div);
     }
 
-    // Riepilogo giorni
     const pieces = Object.keys(dayCounts).map(id => {
         const t = findShiftType(id);
         const label = t ? (t.short || t.name) : id;
         return `${label}: ${dayCounts[id]} gg`;
     });
+
     if (pieces.length === 0) {
         hoursSummaryEl.textContent = "Nessun turno assegnato per questo mese.";
+        drawMonthChart({ entries: [], totalHours: 0 });
+        updateHoursForPay(0);
     } else {
-        // aggiorno ore + grafico
         const stats = getMonthStats(currentYear, currentMonth);
         const parts = stats.entries.map(e => {
             return `${e.label}: ${e.hours.toFixed(1)} h (${e.days} gg)`;
@@ -408,14 +408,7 @@ function renderCalendar() {
         hoursSummaryEl.textContent =
             `Ore totali mese: ${stats.totalHours.toFixed(1)} h — ` + parts.join(" • ");
         drawMonthChart(stats);
-        // aggiorno ore per calcolo paga
         updateHoursForPay(stats.totalHours);
-    }
-
-    if (pieces.length === 0) {
-        // nessuna barra se nessun turno
-        drawMonthChart({ entries: [], totalHours: 0 });
-        updateHoursForPay(0);
     }
 }
 
@@ -649,6 +642,8 @@ function drawMonthChart(stats) {
     const maxHours = Math.max(...entries.map(e => e.hours), 1);
     const usableH = h - padding * 2 - 16;
 
+    const rate = parseFloat((hourlyRateEl.value || "").replace(",", ".")) || 0;
+
     entries.forEach((e, i) => {
         const x = padding + i * barWidth + barWidth * 0.1;
         const barH = (e.hours / maxHours) * usableH;
@@ -657,10 +652,17 @@ function drawMonthChart(stats) {
         ctx.fillStyle = e.color;
         ctx.fillRect(x, y, barWidth * 0.8, barH);
 
+        // Etichetta ore sotto
         ctx.fillStyle = "#222";
         ctx.font = "10px Arial";
         ctx.textAlign = "center";
         ctx.fillText(e.label, x + barWidth * 0.4, h - 5);
+
+        // Guadagno sopra la barra
+        if (rate > 0) {
+            const pay = rate * e.hours;
+            ctx.fillText("€" + pay.toFixed(0), x + barWidth * 0.4, y - 4);
+        }
     });
 }
 
@@ -670,7 +672,7 @@ function loadRate() {
     if (saved !== null && saved !== "") {
         hourlyRateEl.value = saved;
     } else {
-        hourlyRateEl.value = "12.99"; // dal tuo cedolino
+        hourlyRateEl.value = "12.99"; // dal cedolino
     }
 }
 
@@ -678,32 +680,57 @@ function saveRate() {
     localStorage.setItem(STORAGE_RATE, hourlyRateEl.value || "");
 }
 
-function updateHoursForPay(totalHours) {
-    // non abbiamo un campo "ore dal calendario" a video,
-    // usiamo direttamente totalHours nel calcolo
-    // ma potremmo salvarle qui se in futuro servirà.
-    // per ora non facciamo nulla.
+function loadContractHours() {
+    const saved = localStorage.getItem(STORAGE_CONTRACT_HOURS);
+    if (saved !== null && saved !== "") {
+        contractHoursEl.value = saved;
+    } else {
+        contractHoursEl.value = "173"; // dal cedolino: Ore Retribuite
+    }
+}
+
+function saveContractHours() {
+    localStorage.setItem(STORAGE_CONTRACT_HOURS, contractHoursEl.value || "");
+}
+
+function updateHoursForPay(hours) {
+    currentCalendarHours = hours || 0;
+    if (calendarHoursInfoEl) {
+        calendarHoursInfoEl.textContent =
+            `Ore mese dal calendario: ${currentCalendarHours.toFixed(1)} h`;
+    }
 }
 
 function calcPay() {
     saveRate();
+    saveContractHours();
+
     const rate = parseFloat((hourlyRateEl.value || "").replace(",", "."));
     const manual = parseFloat((manualHoursEl.value || "").replace(",", "."));
+    const contractH = parseFloat((contractHoursEl.value || "").replace(",", "."));
+    const calendarH = currentCalendarHours || 0;
 
-    const stats = getMonthStats(currentYear, currentMonth);
-    let hours = stats.totalHours;
-
-    if (!isNaN(manual) && manual > 0) {
-        hours = manual;
-    }
-
-    if (isNaN(rate) || isNaN(hours)) {
-        payResultEl.textContent = "Inserisci una retribuzione oraria valida o ore valide.";
+    if (isNaN(rate) || rate <= 0) {
+        payResultEl.textContent = "Inserisci una retribuzione oraria valida.";
         return;
     }
 
-    const amount = rate * hours;
-    payResultEl.textContent = `Guadagno lordo teorico: € ${amount.toFixed(2)} su ${hours.toFixed(1)} h.`;
+    let baseHours = !isNaN(contractH) && contractH > 0 ? contractH : calendarH;
+    let noteBase = "Ore contrattuali mese";
+    if (!isNaN(manual) && manual > 0) {
+        baseHours = manual;
+        noteBase = "Ore manuali inserite";
+    }
+
+    const basePay = rate * baseHours;
+    const calendarPay = rate * calendarH;
+    const diff = calendarPay - basePay;
+
+    payResultEl.textContent =
+        `${noteBase}: ${baseHours.toFixed(1)} h • ` +
+        `Paga base: € ${basePay.toFixed(2)} — ` +
+        `Stima su ore da calendario (${calendarH.toFixed(1)} h): € ${calendarPay.toFixed(2)} ` +
+        `(differenza: ${diff >= 0 ? "+" : ""}€${diff.toFixed(2)})`;
 }
 
 // ====== UTILI ======
