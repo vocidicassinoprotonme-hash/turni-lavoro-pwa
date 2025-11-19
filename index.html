@@ -16,6 +16,7 @@
   </header>
 
   <main class="app-main">
+    <!-- CARD CALENDARIO -->
     <section class="card">
       <div class="month-nav">
         <button id="prev-month" class="nav-btn">&#10094;</button>
@@ -45,6 +46,7 @@
       </div>
     </section>
 
+    <!-- CARD LEGENDA + INSERIMENTO SETTIMANALE -->
     <section class="card">
       <h2>Legenda turni</h2>
       <div class="legend">
@@ -71,6 +73,37 @@
         L’ordine è: <strong>vuoto → Matt → Pome → Notte → Libero → vuoto</strong>.<br>
         I turni sono salvati solo sul tuo dispositivo.
       </p>
+
+      <hr class="divider" />
+
+      <h2>Inserimento settimanale</h2>
+      <form id="week-form" class="week-form">
+        <div class="week-form-row">
+          <label for="week-start">Data di inizio (di solito il lunedì)</label>
+          <input type="date" id="week-start" />
+        </div>
+
+        <div class="week-form-row">
+          <label for="week-shift">Turno da applicare per 7 giorni</label>
+          <select id="week-shift">
+            <option value="Mattina">Mattina</option>
+            <option value="Pomeriggio">Pomeriggio</option>
+            <option value="Notte">Notte</option>
+            <option value="Libero">Libero</option>
+          </select>
+        </div>
+
+        <div class="week-form-actions">
+          <button type="submit" class="btn primary">
+            Applica alla settimana
+          </button>
+        </div>
+
+        <p class="info-text small">
+          Verrà impostato lo stesso turno per 7 giorni consecutivi
+          dalla data scelta.
+        </p>
+      </form>
     </section>
   </main>
 
