@@ -21,11 +21,11 @@ const SHIFT_ICONS = {
     MATT: "🌅",
     POME: "🌇",
     NOTTE: "🌃",
-    LIB: "🛋️",
-    FER: "🏖️",
-    MUT: "💊",
-    PAR: "📘",
-    PS: "⚕️"
+    LIB:  "🛋️",
+    FER:  "🏖️",
+    MUT:  "💊",
+    PAR:  "📘",
+    PS:   "⚕️"
 };
 
 function getShiftIcon(id) {
@@ -65,6 +65,9 @@ const printPdfBtn = document.getElementById("print-pdf");
 
 const hourlyRateEl = document.getElementById("hourly-rate");
 const contractHoursEl = document.getElementById("contract-hours");
+const bonusSecondEl = document.getElementById("bonus-second");
+const bonusThirdEl = document.getElementById("bonus-third");
+const deductionsEl = document.getElementById("deductions-perc");
 const manualHoursEl = document.getElementById("manual-hours");
 const calendarHoursInfoEl = document.getElementById("calendar-hours-info");
 const calcPayBtn = document.getElementById("calc-pay");
@@ -190,7 +193,6 @@ function saveShiftTypes() {
 }
 
 function buildShiftOrder() {
-    // primo elemento vuoto = nessun turno
     SHIFT_ORDER = [""].concat(shiftTypes.map(t => t.id));
 }
 
@@ -318,7 +320,6 @@ function renderCalendar() {
 
     const todayStr = formatDateKey(new Date());
 
-    // Contatore giorni per tipo
     const dayCounts = {};
 
     const totalCells = firstWeekday + daysInMonth;
@@ -618,13 +619,14 @@ function getMonthStats(year, month) {
     }
 
     const entries = Object.values(perType).map(e => ({
+        id: e.type.id,
         label: e.type.short || e.type.name,
         color: e.type.color || "#888",
         days: e.days,
         hours: e.hours
     }));
 
-    return { entries, totalHours };
+    return { entries, totalHours, perId: perType };
 }
 
 function drawMonthChart(stats) {
@@ -646,27 +648,30 @@ function drawMonthChart(stats) {
 
     entries.forEach((e, i) => {
         const x = padding + i * barWidth + barWidth * 0.1;
-        const barH = (e.hours / maxHours) * usableH;
+        let barH = (e.hours / maxHours) * usableH;
+        if (e.hours === 0) {
+            barH = 6; // mostra comunque i riposi come barra sottile
+        }
         const y = h - padding - barH;
 
         ctx.fillStyle = e.color;
         ctx.fillRect(x, y, barWidth * 0.8, barH);
 
-        // Etichetta ore sotto
         ctx.fillStyle = "#222";
         ctx.font = "10px Arial";
         ctx.textAlign = "center";
         ctx.fillText(e.label, x + barWidth * 0.4, h - 5);
 
-        // Guadagno sopra la barra
-        if (rate > 0) {
+        if (rate > 0 && e.hours > 0) {
             const pay = rate * e.hours;
             ctx.fillText("€" + pay.toFixed(0), x + barWidth * 0.4, y - 4);
+        } else if (e.hours === 0) {
+            ctx.fillText("riposo", x + barWidth * 0.4, y - 4);
         }
     });
 }
 
-// ====== CALCOLO PAGA ======
+// ====== CALCOLO PAGA (stima) ======
 function loadRate() {
     const saved = localStorage.getItem(STORAGE_RATE);
     if (saved !== null && saved !== "") {
@@ -685,7 +690,7 @@ function loadContractHours() {
     if (saved !== null && saved !== "") {
         contractHoursEl.value = saved;
     } else {
-        contractHoursEl.value = "173"; // dal cedolino: Ore Retribuite
+        contractHoursEl.value = "173"; // ore retribuite da cedolino
     }
 }
 
@@ -701,6 +706,14 @@ function updateHoursForPay(hours) {
     }
 }
 
+/**
+ * Stima indicativa:
+ * - MATT, FER, MUT, PAR, PS = 100% retribuzione base
+ * - POME = base + maggiorazione 2° turno
+ * - NOTTE = base + maggiorazione 3° turno
+ * - LIB = 0 €
+ * - tutte le trattenute vengono applicate come % unica sul lordo
+ */
 function calcPay() {
     saveRate();
     saveContractHours();
@@ -708,6 +721,10 @@ function calcPay() {
     const rate = parseFloat((hourlyRateEl.value || "").replace(",", "."));
     const manual = parseFloat((manualHoursEl.value || "").replace(",", "."));
     const contractH = parseFloat((contractHoursEl.value || "").replace(",", "."));
+    const bonus2 = parseFloat((bonusSecondEl.value || "").replace(",", ".")) || 0;
+    const bonus3 = parseFloat((bonusThirdEl.value || "").replace(",", ".")) || 0;
+    const dedPerc = parseFloat((deductionsEl.value || "").replace(",", ".")) || 0;
+
     const calendarH = currentCalendarHours || 0;
 
     if (isNaN(rate) || rate <= 0) {
@@ -715,22 +732,45 @@ function calcPay() {
         return;
     }
 
-    let baseHours = !isNaN(contractH) && contractH > 0 ? contractH : calendarH;
-    let noteBase = "Ore contrattuali mese";
+    const stats = getMonthStats(currentYear, currentMonth);
+    const perId = stats.perId || {};
+
+    const hMatt  = (perId.MATT  ? perId.MATT.hours  : 0);
+    const hPome  = (perId.POME  ? perId.POME.hours  : 0);
+    const hNotte = (perId.NOTTE ? perId.NOTTE.hours : 0);
+    const hLib   = (perId.LIB   ? perId.LIB.hours   : 0);
+    const hFer   = (perId.FER   ? perId.FER.hours   : 0);
+    const hMut   = (perId.MUT   ? perId.MUT.hours   : 0);
+    const hPar   = (perId.PAR   ? perId.PAR.hours   : 0);
+    const hPs    = (perId.PS    ? perId.PS.hours    : 0);
+
+    const baseHours = hMatt + hFer + hMut + hPar + hPs; // 100%
+    const baseGross = baseHours * rate;
+    const secondGross = hPome * rate * (1 + bonus2 / 100);
+    const thirdGross  = hNotte * rate * (1 + bonus3 / 100);
+    const restGross   = hLib * 0; // riposo non pagato
+
+    const totalGrossCalendar = baseGross + secondGross + thirdGross + restGross;
+
+    let baseHoursForCedolino = !isNaN(contractH) && contractH > 0 ? contractH : calendarH;
+    let descrHoursBase = "Ore contrattuali mese";
     if (!isNaN(manual) && manual > 0) {
-        baseHours = manual;
-        noteBase = "Ore manuali inserite";
+        baseHoursForCedolino = manual;
+        descrHoursBase = "Ore manuali inserite";
     }
 
-    const basePay = rate * baseHours;
-    const calendarPay = rate * calendarH;
-    const diff = calendarPay - basePay;
+    const grossCedolino = baseHoursForCedolino * rate;
+    const netCedolino = grossCedolino * (1 - dedPerc / 100);
+    const netCalendar  = totalGrossCalendar * (1 - dedPerc / 100);
+
+    const diffNet = netCalendar - netCedolino;
 
     payResultEl.textContent =
-        `${noteBase}: ${baseHours.toFixed(1)} h • ` +
-        `Paga base: € ${basePay.toFixed(2)} — ` +
-        `Stima su ore da calendario (${calendarH.toFixed(1)} h): € ${calendarPay.toFixed(2)} ` +
-        `(differenza: ${diff >= 0 ? "+" : ""}€${diff.toFixed(2)})`;
+        `${descrHoursBase}: ${baseHoursForCedolino.toFixed(1)} h • ` +
+        `Lordo base: € ${grossCedolino.toFixed(2)} • Netto base (≈${(100-dedPerc).toFixed(1)}%): € ${netCedolino.toFixed(2)}\n` +
+        `Stima su turni del calendario: lordo ≈ € ${totalGrossCalendar.toFixed(2)} • netto ≈ € ${netCalendar.toFixed(2)} ` +
+        `(differenza vs base: ${diffNet >= 0 ? "+" : ""}€${diffNet.toFixed(2)})\n` +
+        `Dettaglio (lordo mese): Matt/Ferie/Mutua ecc. ≈ € ${baseGross.toFixed(2)} • 2° turno ≈ € ${secondGross.toFixed(2)} • 3° turno ≈ € ${thirdGross.toFixed(2)} • Riposi: € 0`;
 }
 
 // ====== UTILI ======
