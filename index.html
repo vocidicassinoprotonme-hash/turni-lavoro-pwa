@@ -13,7 +13,6 @@
 
     <!-- Stili -->
     <link rel="stylesheet" href="styles.css">
-
 </head>
 <body>
 
@@ -27,12 +26,10 @@
         </div>
     </header>
 
-
     <!-- PAGINA CALENDARIO -->
     <main id="page-calendario">
 
         <section class="calendar-card">
-
             <div class="month-nav">
                 <button id="prev-month" class="nav-btn">❮</button>
                 <div class="month-label">
@@ -55,9 +52,7 @@
             <div id="calendar-grid" class="calendar-grid">
                 <!-- celle create da app.js -->
             </div>
-
         </section>
-
 
         <section class="card">
             <h2>Inserimento settimanale</h2>
@@ -73,7 +68,6 @@
             </form>
         </section>
 
-
         <section class="card">
             <h2>Riepilogo ore & grafico</h2>
             <p id="hours-summary"></p>
@@ -81,8 +75,6 @@
         </section>
 
     </main>
-
-
 
     <!-- PAGINA IMPOSTAZIONI -->
     <main id="page-settings" style="display:none;">
@@ -96,7 +88,6 @@
             <h2>Crea un nuovo turno</h2>
 
             <form id="shift-type-form">
-
                 <label>Sigla breve</label>
                 <input id="shift-short" placeholder="Es. Matt">
 
@@ -113,7 +104,6 @@
             </form>
         </section>
 
-
         <section class="card">
             <h2>Backup & PDF</h2>
 
@@ -124,15 +114,19 @@
             <button id="print-pdf" class="btn-primary">Stampa/Salva PDF</button>
         </section>
 
-
         <section class="card">
             <h2>Calcolo guadagni</h2>
 
+            <p id="calendar-hours-info"></p>
+
             <label>Retribuzione oraria (€)</label>
-            <input id="hourly-rate" type="number" value="12.99">
+            <input id="hourly-rate" type="number" step="0.01" value="12.99">
+
+            <label>Ore contrattuali mese</label>
+            <input id="contract-hours" type="number" value="173">
 
             <label>Ore manuali (opzionale)</label>
-            <input id="manual-hours" type="number" placeholder="0">
+            <input id="manual-hours" type="number" placeholder="Es. 173">
 
             <button id="calc-pay" class="btn-primary">Calcola guadagni</button>
 
@@ -141,12 +135,8 @@
 
     </main>
 
-
-
-
     <!-- POPUP NOTA GIORNO -->
     <div id="note-popup" class="popup hidden">
-
         <div class="popup-content">
             <h3>Nota del giorno</h3>
 
@@ -162,12 +152,8 @@
                 <button id="popup-save" class="btn-primary">Salva</button>
             </div>
         </div>
-
     </div>
 
-
-
     <script src="app.js"></script>
-
 </body>
 </html>
