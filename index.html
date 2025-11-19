@@ -1,21 +1,163 @@
-{
-  "name": "Turni di lavoro",
-  "short_name": "Turni",
-  "start_url": "/turni-lavoro-pwa/",
-  "scope": "/turni-lavoro-pwa/",
-  "display": "standalone",
-  "theme_color": "#1976d2",
-  "background_color": "#ffffff",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Turni di lavoro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1976d2" />
+
+  <!-- Stile -->
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+
+  <!-- Icone App -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+</head>
+
+<body>
+  <header class="app-header">
+    <h1>Turni di lavoro</h1>
+    <p class="subtitle">Calendario turni personale</p>
+  </header>
+
+  <main class="app-main">
+    <!-- CARD CALENDARIO -->
+    <section class="card">
+      <div class="month-nav">
+        <button id="prev-month" class="nav-btn">&#10094;</button>
+        <div class="month-label">
+          <span id="month-name"></span>
+          <span id="year-number"></span>
+        </div>
+        <button id="next-month" class="nav-btn">&#10095;</button>
+      </div>
+
+      <div class="weekdays-row">
+        <div>LUN</div>
+        <div>MAR</div>
+        <div>MER</div>
+        <div>GIO</div>
+        <div>VEN</div>
+        <div>SAB</div>
+        <div>DOM</div>
+      </div>
+
+      <div id="calendar-grid" class="calendar-grid">
+        <!-- celle generate da app.js -->
+      </div>
+
+      <div id="month-summary" class="month-summary"></div>
+    </section>
+
+    <!-- CARD TURNI DISPONIBILI + SETTIMANA -->
+    <section class="card">
+      <h2>Turni disponibili</h2>
+
+      <div class="shift-types-list">
+
+        <div class="shift-type-item">
+          <span class="shift-type-color par"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">PAR</div>
+            <div class="shift-type-desc">PAR</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color ferie"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Ferie</div>
+            <div class="shift-type-desc">Nuovo</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color ps"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">P.S.</div>
+            <div class="shift-type-desc">Nuovo</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color mutua"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Mutua</div>
+            <div class="shift-type-desc">Nuovo</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color pome"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Pome</div>
+            <div class="shift-type-desc">Pomeriggio (14:00–22:00)</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color matt"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Matt</div>
+            <div class="shift-type-desc">Mattina (06:00–14:00)</div>
+          </div>
+        </div>
+
+        <div class="shift-type-item">
+          <span class="shift-type-color libero"></span>
+          <div class="shift-type-text">
+            <div class="shift-type-name">Libero</div>
+            <div class="shift-type-desc">Riposo</div>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="info-text">
+        Tocca una casella del calendario per cambiare il turno.<br>
+        Sequenza: <strong>vuoto → Matt → Pome → Notte → Libero → Ferie → Mutua → PAR → P.S. → vuoto</strong>.
+      </p>
+
+      <hr class="divider" />
+
+      <h2>Inserimento settimanale</h2>
+
+      <form id="week-form" class="week-form">
+        <div class="week-form-row">
+          <label for="week-start">Data di inizio settimana</label>
+          <input type="date" id="week-start" />
+        </div>
+
+        <div class="week-form-row">
+          <label for="week-shift">Turno da applicare</label>
+          <select id="week-shift">
+            <option value="Mattina">Mattina (06:00–14:00)</option>
+            <option value="Pomeriggio">Pomeriggio (14:00–22:00)</option>
+            <option value="Notte">Notte</option>
+            <option value="Libero">Riposo</option>
+            <option value="Ferie">Ferie</option>
+            <option value="Mutua">Mutua</option>
+            <option value="PAR">PAR</option>
+            <option value="P.S.">P.S.</option>
+          </select>
+        </div>
+
+        <div class="week-form-actions">
+          <button type="submit" class="btn primary">Applica alla settimana</button>
+        </div>
+      </form>
+
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    Turni di lavoro • PWA personale
+  </footer>
+
+  <!-- JS principale -->
+  <script src="./app.js"></script>
+</body>
+</html>
