@@ -46,8 +46,48 @@ body {
   padding: 0 0.75rem;
   display: flex;
   flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* TABS */
+
+.tabs {
+  display: flex;
+  background: #e5e7eb;
+  border-radius: 999px;
+  padding: 0.15rem;
+}
+
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+}
+
+/* PAGINE */
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: flex;
+  flex-direction: column;
   gap: 0.8rem;
 }
+
+/* CARD */
 
 .card {
   background: #ffffff;
@@ -387,15 +427,15 @@ body {
   border: 1px solid #e5e7eb;
 }
 
-/* LAYOUT DESKTOP */
+/* LAYOUT DESKTOP: affianca le card nella pagina attiva */
 
 @media (min-width: 860px) {
-  .app-main {
+  .page.active {
     flex-direction: row;
     align-items: flex-start;
   }
 
-  .card {
+  .page.active .card {
     flex: 1;
   }
 }
