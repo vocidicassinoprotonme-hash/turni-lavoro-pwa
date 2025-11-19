@@ -1,125 +1,238 @@
-const STORAGE_KEY = "turni_lavoro";
+// Chiave di salvataggio locale
+const STORAGE_KEY = "turni_calendar_v1";
 
-let shifts = [];
+// Mappa: { "YYYY-MM-DD": "Mattina" | "Pomeriggio" | "Notte" | "Libero" }
+let shifts = {};
 
-const form = document.getElementById("shift-form");
-const idField = document.getElementById("shift-id");
-const dateField = document.getElementById("date");
-const startField = document.getElementById("start");
-const endField = document.getElementById("end");
-const typeField = document.getElementById("type");
-const notesField = document.getElementById("notes");
+// Stato mese corrente
+let currentYear;
+let currentMonth; // 0-11
 
-const listEl = document.getElementById("shifts-list");
-const emptyMsg = document.getElementById("empty-message");
+// Tipi di turno in ciclo
+const SHIFT_ORDER = ["", "Mattina", "Pomeriggio", "Notte", "Libero"];
 
-document.addEventListener("DOMContentLoaded", () => {
-  load();
-  render();
+// Elementi DOM
+const monthNameEl = document.getElementById("month-name");
+const yearNumberEl = document.getElementById("year-number");
+const calendarGridEl = document.getElementById("calendar-grid");
+const monthSummaryEl = document.getElementById("month-summary");
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js");
-  }
+document.getElementById("prev-month").addEventListener("click", () => {
+  changeMonth(-1);
 });
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
+document.getElementById("next-month").addEventListener("click", () => {
+  changeMonth(1);
+});
 
-  const shift = {
-    id: idField.value || crypto.randomUUID(),
-    date: dateField.value,
-    start: startField.value,
-    end: endField.value,
-    type: typeField.value,
-    notes: notesField.value.trim()
+// Inizializzazione
+document.addEventListener("DOMContentLoaded", () => {
+  loadShifts();
+
+  const today = new Date();
+  currentYear = today.getFullYear();
+  currentMonth = today.getMonth();
+
+  renderCalendar();
+});
+
+// Carica / salva
+
+function loadShifts() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      shifts = {};
+      return;
+    }
+    shifts = JSON.parse(raw) || {};
+  } catch (err) {
+    console.error("Errore nel caricamento turni:", err);
+    shifts = {};
+  }
+}
+
+function saveShifts() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts));
+  } catch (err) {
+    console.error("Errore nel salvataggio turni:", err);
+  }
+}
+
+// Cambio mese
+
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  } else if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
+  renderCalendar();
+}
+
+// Rendering calendario
+
+function renderCalendar() {
+  const monthNames = [
+    "GENNAIO",
+    "FEBBRAIO",
+    "MARZO",
+    "APRILE",
+    "MAGGIO",
+    "GIUGNO",
+    "LUGLIO",
+    "AGOSTO",
+    "SETTEMBRE",
+    "OTTOBRE",
+    "NOVEMBRE",
+    "DICEMBRE"
+  ];
+
+  monthNameEl.textContent = monthNames[currentMonth];
+  yearNumberEl.textContent = currentYear;
+
+  calendarGridEl.innerHTML = "";
+
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  const firstWeekday = (firstDay.getDay() + 6) % 7; // converti: Lun=0 ... Dom=6
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+
+  const totalCells = 42; // 6 righe x 7 colonne
+
+  const today = new Date();
+  const todayStr = formatDateKey(today);
+
+  // Riepilogo conteggio per mese
+  const monthCounts = {
+    Mattina: 0,
+    Pomeriggio: 0,
+    Notte: 0,
+    Libero: 0
   };
 
-  const existingIndex = shifts.findIndex(s => s.id === shift.id);
+  for (let i = 0; i < totalCells; i++) {
+    const cell = document.createElement("div");
+    cell.className = "day-cell";
 
-  if (existingIndex >= 0) shifts[existingIndex] = shift;
-  else shifts.push(shift);
+    const dayNumberEl = document.createElement("div");
+    dayNumberEl.className = "day-number";
 
-  save();
-  render();
-  clearForm();
-});
+    const labelEl = document.createElement("div");
+    labelEl.className = "day-label";
 
-document.getElementById("reset-btn").onclick = clearForm;
+    let dateObj;
+    let inCurrentMonth = false;
 
-document.getElementById("clear-all").onclick = () => {
-  if (confirm("Cancellare tutti i turni?")) {
-    shifts = [];
-    save();
-    render();
-  }
-};
+    if (i < firstWeekday) {
+      // giorni del mese precedente
+      const day = prevMonthDays - (firstWeekday - 1 - i);
+      dateObj = new Date(currentYear, currentMonth - 1, day);
+      cell.classList.add("outside-month");
+    } else if (i >= firstWeekday && i < firstWeekday + daysInMonth) {
+      // giorni del mese corrente
+      const day = i - firstWeekday + 1;
+      dateObj = new Date(currentYear, currentMonth, day);
+      inCurrentMonth = true;
+    } else {
+      // giorni del mese successivo
+      const day = i - (firstWeekday + daysInMonth) + 1;
+      dateObj = new Date(currentYear, currentMonth + 1, day);
+      cell.classList.add("outside-month");
+    }
 
-function clearForm() {
-  idField.value = "";
-  dateField.value = "";
-  startField.value = "";
-  endField.value = "";
-  typeField.value = "Mattina";
-  notesField.value = "";
-}
+    const dateKey = formatDateKey(dateObj);
+    const dayNum = dateObj.getDate();
+    dayNumberEl.textContent = dayNum;
 
-function load() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (data) shifts = JSON.parse(data);
-}
+    const shiftType = shifts[dateKey] || "";
 
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts));
-}
+    if (shiftType) {
+      labelEl.textContent = shortLabel(shiftType);
+      applyShiftClass(cell, shiftType);
 
-function render() {
-  listEl.innerHTML = "";
+      if (inCurrentMonth && monthCounts[shiftType] != null) {
+        monthCounts[shiftType]++;
+      }
+    }
 
-  if (shifts.length === 0) {
-    emptyMsg.style.display = "block";
-    return;
-  }
+    if (dateKey === todayStr && inCurrentMonth) {
+      cell.classList.add("today");
+    }
 
-  emptyMsg.style.display = "none";
-
-  shifts
-    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start))
-    .forEach(shift => {
-      const li = document.createElement("li");
-      li.className = "shift-item";
-
-      li.innerHTML = `
-        <strong>${formatDate(shift.date)}</strong><br>
-        ${shift.type} — ${shift.start} → ${shift.end}<br>
-        <em>${shift.notes || "Nessuna nota"}</em>
-        <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
-          <button class="btn secondary small" onclick='edit("${shift.id}")'>Modifica</button>
-          <button class="btn danger small" onclick='remove("${shift.id}")'>Elimina</button>
-        </div>
-      `;
-
-      listEl.appendChild(li);
+    cell.addEventListener("click", () => {
+      cycleShift(dateKey);
     });
+
+    cell.appendChild(dayNumberEl);
+    cell.appendChild(labelEl);
+    calendarGridEl.appendChild(cell);
+  }
+
+  // Riepilogo mese
+  monthSummaryEl.textContent =
+    `Riepilogo mese: ` +
+    `Mattina ${monthCounts.Mattina} • ` +
+    `Pome ${monthCounts.Pomeriggio} • ` +
+    `Notte ${monthCounts.Notte} • ` +
+    `Libero ${monthCounts.Libero}`;
 }
 
-function edit(id) {
-  const shift = shifts.find(s => s.id === id);
-  idField.value = shift.id;
-  dateField.value = shift.date;
-  startField.value = shift.start;
-  endField.value = shift.end;
-  typeField.value = shift.type;
-  notesField.value = shift.notes;
-  scrollTo({ top: 0, behavior: "smooth" });
+// Ruota i tipi di turno con il tocco
+
+function cycleShift(dateKey) {
+  const currentType = shifts[dateKey] || "";
+  const index = SHIFT_ORDER.indexOf(currentType);
+  const nextType = SHIFT_ORDER[(index + 1) % SHIFT_ORDER.length];
+
+  if (nextType === "") {
+    delete shifts[dateKey];
+  } else {
+    shifts[dateKey] = nextType;
+  }
+
+  saveShifts();
+  renderCalendar();
 }
 
-function remove(id) {
-  shifts = shifts.filter(s => s.id !== id);
-  save();
-  render();
+// Utilità
+
+function formatDateKey(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const d = String(dateObj.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
-function formatDate(str) {
-  const [y, m, d] = str.split("-");
-  return `${d}/${m}/${y}`;
+function shortLabel(shiftType) {
+  switch (shiftType) {
+    case "Mattina":
+      return "Matt";
+    case "Pomeriggio":
+      return "Pome";
+    case "Notte":
+      return "Notte";
+    case "Libero":
+      return "Libero";
+    default:
+      return "";
+  }
+}
+
+function applyShiftClass(cell, shiftType) {
+  cell.classList.remove(
+    "shift-mattina",
+    "shift-pomeriggio",
+    "shift-notte",
+    "shift-libero"
+  );
+  if (shiftType === "Mattina") cell.classList.add("shift-mattina");
+  if (shiftType === "Pomeriggio") cell.classList.add("shift-pomeriggio");
+  if (shiftType === "Notte") cell.classList.add("shift-notte");
+  if (shiftType === "Libero") cell.classList.add("shift-libero");
 }
