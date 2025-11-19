@@ -9,12 +9,12 @@
   <!-- Stile -->
   <link rel="stylesheet" href="./styles.css" />
 
-  <!-- Manifest PWA - PERCORSO ASSOLUTO PER GITHUB PAGES -->
+  <!-- Manifest PWA - percorso assoluto per GitHub Pages -->
   <link rel="manifest" href="/turni-lavoro-pwa/manifest.webmanifest" />
 
-  <!-- Icone App -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <!-- Icone App (favicon + apple) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/turni-lavoro-pwa/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/turni-lavoro-pwa/icons/icon-192.png" />
 </head>
 
 <body>
@@ -24,107 +24,119 @@
   </header>
 
   <main class="app-main">
-    <!-- CARD CALENDARIO -->
-    <section class="card">
-      <div class="month-nav">
-        <button id="prev-month" class="nav-btn">&#10094;</button>
-        <div class="month-label">
-          <span id="month-name"></span>
-          <span id="year-number"></span>
-        </div>
-        <button id="next-month" class="nav-btn">&#10095;</button>
-      </div>
+    <!-- TAB NAV -->
+    <div class="tabs">
+      <button class="tab-btn active" data-page="calendar">Calendario</button>
+      <button class="tab-btn" data-page="settings">Impostazioni</button>
+    </div>
 
-      <div class="weekdays-row">
-        <div>LUN</div>
-        <div>MAR</div>
-        <div>MER</div>
-        <div>GIO</div>
-        <div>VEN</div>
-        <div>SAB</div>
-        <div>DOM</div>
-      </div>
-
-      <div id="calendar-grid" class="calendar-grid">
-        <!-- celle generate da app.js -->
-      </div>
-
-      <div id="month-summary" class="month-summary"></div>
-    </section>
-
-    <!-- CARD LATERALE: turni, settimana, backup, riepilogo -->
-    <section class="card">
-      <h2>Turni disponibili</h2>
-
-      <div id="shift-types-list" class="shift-types-list">
-        <!-- elenco turni generato da app.js -->
-      </div>
-
-      <h3 class="sub-title">Crea un nuovo turno</h3>
-      <form id="shift-type-form" class="shift-type-form">
-        <div class="shift-type-row">
-          <label for="shift-short">Sigla breve (es. Matt, Pome, PAR)</label>
-          <input id="shift-short" maxlength="6" />
-        </div>
-        <div class="shift-type-row">
-          <label for="shift-name">Nome turno</label>
-          <input id="shift-name" placeholder="Es. Mattina, Ferie, Mutua" />
-        </div>
-        <div class="shift-type-row">
-          <label for="shift-hours">Orario (facoltativo)</label>
-          <input id="shift-hours" placeholder="Es. 06:00-14:00" />
-        </div>
-        <div class="shift-type-row">
-          <label for="shift-color">Colore</label>
-          <input type="color" id="shift-color" value="#f97373" />
-        </div>
-        <div class="shift-type-actions">
-          <button type="submit" class="btn secondary">Aggiungi turno</button>
-        </div>
-      </form>
-
-      <p class="info-text">
-        Tocca una casella del calendario per cambiare il turno del giorno.
-        La rotazione segue l'ordine dei turni in elenco.
-      </p>
-
-      <hr class="divider" />
-
-      <h2>Inserimento settimanale</h2>
-      <form id="week-form" class="week-form">
-        <div class="week-form-row">
-          <label for="week-start">Data di inizio settimana</label>
-          <input type="date" id="week-start" />
+    <!-- PAGINA 1: CALENDARIO + SETTIMANA + GRAFICO -->
+    <div id="page-calendar" class="page active">
+      <!-- CARD CALENDARIO -->
+      <section class="card">
+        <div class="month-nav">
+          <button id="prev-month" class="nav-btn">&#10094;</button>
+          <div class="month-label">
+            <span id="month-name"></span>
+            <span id="year-number"></span>
+          </div>
+          <button id="next-month" class="nav-btn">&#10095;</button>
         </div>
 
-        <div class="week-form-row">
-          <label for="week-shift">Turno da applicare (7 giorni)</label>
-          <select id="week-shift"></select>
+        <div class="weekdays-row">
+          <div>LUN</div>
+          <div>MAR</div>
+          <div>MER</div>
+          <div>GIO</div>
+          <div>VEN</div>
+          <div>SAB</div>
+          <div>DOM</div>
         </div>
 
-        <div class="week-form-actions">
-          <button type="submit" class="btn primary">Applica alla settimana</button>
+        <div id="calendar-grid" class="calendar-grid">
+          <!-- celle generate da app.js -->
         </div>
-      </form>
 
-      <hr class="divider" />
+        <div id="month-summary" class="month-summary"></div>
+      </section>
 
-      <h2>Backup & PDF</h2>
-      <div class="backup-buttons">
-        <button id="export-json" class="btn secondary">Esporta backup (.json)</button>
-        <button id="import-json-btn" class="btn secondary">Importa backup</button>
-        <input type="file" id="import-json-file" accept="application/json" hidden />
-      </div>
-      <div class="backup-buttons">
-        <button id="print-pdf" class="btn primary">Stampa / Salva PDF mese</button>
-      </div>
+      <!-- CARD INSERIMENTO SETTIMANA + GRAFICO -->
+      <section class="card">
+        <h2>Inserimento settimanale</h2>
+        <form id="week-form" class="week-form">
+          <div class="week-form-row">
+            <label for="week-start">Data di inizio settimana</label>
+            <input type="date" id="week-start" />
+          </div>
 
-      <hr class="divider" />
+          <div class="week-form-row">
+            <label for="week-shift">Turno da applicare (7 giorni)</label>
+            <select id="week-shift"></select>
+          </div>
 
-      <h2>Riepilogo ore & grafico</h2>
-      <div id="hours-summary" class="info-text"></div>
-      <canvas id="month-chart" width="380" height="180"></canvas>
-    </section>
+          <div class="week-form-actions">
+            <button type="submit" class="btn primary">Applica alla settimana</button>
+          </div>
+        </form>
+
+        <hr class="divider" />
+
+        <h2>Riepilogo ore & grafico</h2>
+        <div id="hours-summary" class="info-text"></div>
+        <canvas id="month-chart" width="380" height="180"></canvas>
+      </section>
+    </div>
+
+    <!-- PAGINA 2: IMPOSTAZIONI / TURNI -->
+    <div id="page-settings" class="page">
+      <section class="card">
+        <h2>Turni disponibili</h2>
+
+        <div id="shift-types-list" class="shift-types-list">
+          <!-- elenco turni generato da app.js -->
+        </div>
+
+        <h3 class="sub-title">Crea un nuovo turno</h3>
+        <form id="shift-type-form" class="shift-type-form">
+          <div class="shift-type-row">
+            <label for="shift-short">Sigla breve (es. Matt, Pome, PAR)</label>
+            <input id="shift-short" maxlength="6" />
+          </div>
+          <div class="shift-type-row">
+            <label for="shift-name">Nome turno</label>
+            <input id="shift-name" placeholder="Es. Mattina, Ferie, Mutua" />
+          </div>
+          <div class="shift-type-row">
+            <label for="shift-hours">Orario (facoltativo)</label>
+            <input id="shift-hours" placeholder="Es. 06:00-14:00" />
+          </div>
+          <div class="shift-type-row">
+            <label for="shift-color">Colore</label>
+            <input type="color" id="shift-color" value="#f97373" />
+          </div>
+          <div class="shift-type-actions">
+            <button type="submit" class="btn secondary">Aggiungi turno</button>
+          </div>
+        </form>
+
+        <p class="info-text">
+          Tocca una casella del calendario per cambiare il turno del giorno.
+          La rotazione segue l'ordine dei turni in elenco.
+        </p>
+
+        <hr class="divider" />
+
+        <h2>Backup & PDF</h2>
+        <div class="backup-buttons">
+          <button id="export-json" class="btn secondary">Esporta backup (.json)</button>
+          <button id="import-json-btn" class="btn secondary">Importa backup</button>
+          <input type="file" id="import-json-file" accept="application/json" hidden />
+        </div>
+        <div class="backup-buttons">
+          <button id="print-pdf" class="btn primary">Stampa / Salva PDF mese</button>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer class="app-footer">
