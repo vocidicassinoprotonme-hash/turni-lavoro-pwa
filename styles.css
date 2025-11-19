@@ -1,86 +1,252 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
-  font-family: system-ui;
-  background: #f4f6f8;
-  color: #222;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-header {
-  background: #1976d2;
-  color: white;
-  padding: 1rem;
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  color: #ffffff;
+  padding: 1.1rem 1.2rem 0.9rem;
   text-align: center;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
 }
 
-.subtitle {
+.app-header h1 {
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.app-header .subtitle {
   font-size: 0.9rem;
-  opacity: 0.9;
+  opacity: 0.93;
 }
 
 .app-main {
-  max-width: 900px;
-  margin: auto;
-  padding: 1rem;
+  flex: 1;
+  width: 100%;
+  max-width: 980px;
+  margin: 0.8rem auto 1.1rem;
+  padding: 0 0.75rem;
   display: flex;
-  gap: 1rem;
   flex-direction: column;
+  gap: 0.8rem;
 }
 
 .card {
-  background: white;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-radius: 0.85rem;
+  padding: 0.9rem 0.9rem 1rem;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
 }
 
-.form-row {
-  margin-bottom: 0.75rem;
+.card h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Navigazione mese */
+
+.month-nav {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
 }
 
-.form-row input,
-.form-row select,
-.form-row textarea {
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
-}
-
-.buttons-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.btn {
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
+.nav-btn {
   border: none;
+  background: #e5e7eb;
+  color: #111827;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.primary { background: #1976d2; color: white; }
-.secondary { background: #e0e0e0; }
-.danger { background: #d32f2f; color: white; }
-.small { padding: 0.3rem 0.6rem; }
+.nav-btn:active {
+  transform: translateY(1px);
+}
 
-.shifts-list {
-  list-style: none;
+.month-label {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  align-items: center;
+  font-weight: 600;
 }
 
-.shift-item {
-  background: #f7f7f7;
-  border: 1px solid #ddd;
-  padding: 0.8rem;
-  border-radius: 0.7rem;
+#month-name {
+  text-transform: uppercase;
+  font-size: 0.95rem;
 }
 
-.empty-message {
+#year-number {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Intestazione giorni settimana */
+
+.weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  padding: 1rem;
-  color: #777;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+/* Calendario */
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  background: #e5e7eb;
+  border-radius: 0.7rem;
+  overflow: hidden;
+}
+
+.day-cell {
+  min-height: 60px;
+  background: #f9fafb;
+  position: relative;
+  padding: 3px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.day-cell.outside-month {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.day-number {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.day-label {
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+/* Evidenziazione oggi */
+
+.day-cell.today .day-number {
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 0 5px;
+  border: 1px solid #2563eb;
+}
+
+/* Colori turni */
+
+.shift-mattina {
+  background: #f9c5d9;
+}
+
+.shift-pomeriggio {
+  background: #fdc9a8;
+}
+
+.shift-notte {
+  background: #e0c8ff;
+}
+
+.shift-libero {
+  background: #cdecc4;
+}
+
+/* Riepilogo mese */
+
+.month-summary {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+/* Legenda */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.legend-mattina {
+  background: #f9c5d9;
+}
+
+.legend-pomeriggio {
+  background: #fdc9a8;
+}
+
+.legend-notte {
+  background: #e0c8ff;
+}
+
+.legend-libero {
+  background: #cdecc4;
+}
+
+.info-text {
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.app-footer {
+  padding: 0.6rem 1rem 0.9rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Layout più largo su desktop */
+
+@media (min-width: 860px) {
+  .app-main {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .card {
+    flex: 1;
+  }
 }
