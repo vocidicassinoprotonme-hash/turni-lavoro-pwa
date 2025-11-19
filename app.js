@@ -1,13 +1,37 @@
-// ==================== CHIAVI DI SALVATAGGIO ====================
+// ==================== COSTANTI & STORAGE ====================
 
 const STORAGE_KEY_SHIFTS = "turni_calendar_v3";
 const STORAGE_KEY_TYPES = "turni_shift_types_v2";
+const STORAGE_KEY_NOTES = "turni_notes_v1";
+const STORAGE_KEY_EARNINGS = "turni_earnings_v1";
+
+// Iconcine per i turni
+const SHIFT_ICONS = {
+  MATT: "🌅",
+  POME: "🌇",
+  NOTTE: "🌃",
+  LIB: "🛋️",
+  FER: "🏖️",
+  MUT: "🩺",
+  PAR: "📄",
+  PS: "🏥"
+};
 
 // Mappa turni per giorno: { "YYYY-MM-DD": "ID_TURNO" }
 let shifts = {};
 
 // Elenco tipi di turno: [{ id, short, name, hours, color }]
 let shiftTypes = [];
+
+// Note per giorno: { "YYYY-MM-DD": { title, text } }
+let notes = {};
+
+// Stato guadagni
+let earningsState = {
+  hourlyRate: 0,
+  oreRetribuite: null,
+  oreEccedenza: null
+};
 
 // ordine di rotazione nel calendario (viene ricostruito)
 let SHIFT_ORDER = [""];
@@ -38,7 +62,7 @@ const weekForm = document.getElementById("week-form");
 const weekStartEl = document.getElementById("week-start");
 const weekShiftEl = document.getElementById("week-shift");
 
-// Backup & PDF
+// Backup & PDF calendario
 const exportJsonBtn = document.getElementById("export-json");
 const importJsonBtn = document.getElementById("import-json-btn");
 const importJsonFile = document.getElementById("import-json-file");
@@ -47,6 +71,22 @@ const printPdfBtn = document.getElementById("print-pdf");
 // Riepilogo & grafico
 const hoursSummaryEl = document.getElementById("hours-summary");
 const chartCanvas = document.getElementById("month-chart");
+
+// Guadagni
+const hourlyPayInput = document.getElementById("hourly-pay");
+const payrollPdfInput = document.getElementById("payroll-pdf");
+const earningsSummaryEl = document.getElementById("earnings-summary");
+
+// Modale giorno
+const dayModal = document.getElementById("day-modal");
+const dayModalDateLabel = document.getElementById("day-modal-date");
+const dayModalShiftSelect = document.getElementById("day-modal-shift");
+const dayModalTitleInput = document.getElementById("day-modal-title");
+const dayModalTextInput = document.getElementById("day-modal-text");
+const dayModalSaveBtn = document.getElementById("day-modal-save");
+const dayModalCancelBtn = document.getElementById("day-modal-cancel");
+
+let modalDateKey = null;
 
 // Pulsanti cambio mese
 document.getElementById("prev-month").addEventListener("click", () => {
@@ -63,12 +103,13 @@ let currentMonth; // 0-11
 // ==================== INIZIALIZZAZIONE ====================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Tab navigation
   setupTabs();
 
   loadShiftTypes();
   buildShiftOrder();
   loadShifts();
+  loadNotes();
+  loadEarningsState();
 
   const today = new Date();
   currentYear = today.getFullYear();
@@ -105,24 +146,57 @@ document.addEventListener("DOMContentLoaded", () => {
     printPdfBtn.addEventListener("click", printPdf);
   }
 
+  if (hourlyPayInput) {
+    if (earningsState.hourlyRate) {
+      hourlyPayInput.value = earningsState.hourlyRate.toString().replace(".", ",");
+    }
+    hourlyPayInput.addEventListener("input", () => {
+      const v = parseFloat((hourlyPayInput.value || "").replace(",", "."));
+      earningsState.hourlyRate = Number.isFinite(v) ? v : 0;
+      saveEarningsState();
+      updateEarningsSummary();
+    });
+  }
+
+  if (payrollPdfInput) {
+    payrollPdfInput.addEventListener("change", handlePayrollPdf);
+  }
+
+  if (dayModalSaveBtn) {
+    dayModalSaveBtn.addEventListener("click", () => {
+      saveDayModal();
+    });
+  }
+  if (dayModalCancelBtn) {
+    dayModalCancelBtn.addEventListener("click", () => {
+      closeDayModal();
+    });
+  }
+  if (dayModal) {
+    // chiudi se clicchi fuori dalla card
+    dayModal.addEventListener("click", (e) => {
+      if (e.target === dayModal) closeDayModal();
+    });
+  }
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(() => {});
   }
 
   renderShiftTypes();
   populateWeekSelect();
+  populateModalShiftSelect();
   renderCalendar();
+  updateEarningsSummary();
 });
 
 // ==================== TABS ====================
 
 function setupTabs() {
   function showPage(name) {
-    // pulsanti
     tabButtons.forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.page === name);
     });
-    // pagine
     pageCalendar.classList.toggle("active", name === "calendar");
     pageSettings.classList.toggle("active", name === "settings");
   }
@@ -134,7 +208,6 @@ function setupTabs() {
     });
   });
 
-  // pagina di default
   showPage("calendar");
 }
 
@@ -271,6 +344,7 @@ function addNewShiftType() {
   buildShiftOrder();
   renderShiftTypes();
   populateWeekSelect();
+  populateModalShiftSelect();
   renderCalendar();
 
   shiftShortEl.value = "";
@@ -289,7 +363,8 @@ function renderShiftTypes() {
 
     const badge = document.createElement("div");
     badge.className = "shift-type-badge";
-    badge.textContent = t.short || t.id;
+    const badgeIcon = SHIFT_ICONS[t.id] || "";
+    badge.textContent = badgeIcon || t.short || t.id;
     badge.style.background = t.color || "#e5e7eb";
 
     const info = document.createElement("div");
@@ -297,7 +372,8 @@ function renderShiftTypes() {
 
     const nameEl = document.createElement("div");
     nameEl.className = "shift-type-name";
-    nameEl.textContent = t.name;
+    const icon = SHIFT_ICONS[t.id] || "";
+    nameEl.textContent = icon ? icon + " " + t.name : t.name;
 
     const hoursEl = document.createElement("div");
     hoursEl.className = "shift-type-hours";
@@ -324,6 +400,29 @@ function populateWeekSelect() {
   });
 }
 
+function populateModalShiftSelect() {
+  if (!dayModalShiftSelect) return;
+  const current = dayModalShiftSelect.value;
+  dayModalShiftSelect.innerHTML = "";
+
+  const optNone = document.createElement("option");
+  optNone.value = "";
+  optNone.textContent = "Nessun turno";
+  dayModalShiftSelect.appendChild(optNone);
+
+  shiftTypes.forEach((t) => {
+    const opt = document.createElement("option");
+    const icon = SHIFT_ICONS[t.id] || "";
+    opt.value = t.id;
+    opt.textContent = icon ? `${icon} ${t.name}` : t.name;
+    dayModalShiftSelect.appendChild(opt);
+  });
+
+  if (current) {
+    dayModalShiftSelect.value = current;
+  }
+}
+
 // ==================== TURNI PER GIORNO ====================
 
 function loadShifts() {
@@ -345,6 +444,26 @@ function saveShifts() {
     localStorage.setItem(STORAGE_KEY_SHIFTS, JSON.stringify(shifts));
   } catch (err) {
     console.error("Errore salvataggio turni calendario:", err);
+  }
+}
+
+// ==================== NOTE ====================
+
+function loadNotes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_NOTES);
+    notes = raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    console.error("Errore caricamento note:", err);
+    notes = {};
+  }
+}
+
+function saveNotes() {
+  try {
+    localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes));
+  } catch (err) {
+    console.error("Errore salvataggio note:", err);
   }
 }
 
@@ -393,7 +512,6 @@ function renderCalendar() {
   const today = new Date();
   const todayStr = formatDateKey(today);
 
-  // Per riepilogo mese (solo conteggio giorni)
   const dayCounts = {};
 
   for (let i = 0; i < totalCells; i++) {
@@ -431,7 +549,9 @@ function renderCalendar() {
     const type = shiftId ? findShiftType(shiftId) : null;
 
     if (type) {
-      labelEl.textContent = type.short || "";
+      const icon = SHIFT_ICONS[type.id] || "";
+      const labelShort = type.short || "";
+      labelEl.textContent = icon ? `${icon} ${labelShort}` : labelShort;
       if (type.color) {
         cell.style.background = type.color;
       }
@@ -442,12 +562,20 @@ function renderCalendar() {
       }
     }
 
+    const note = notes[dateKey];
+    if (note && note.title) {
+      const noteEl = document.createElement("div");
+      noteEl.className = "day-note-title";
+      noteEl.textContent = note.title;
+      cell.appendChild(noteEl);
+    }
+
     if (dateKey === todayStr && inCurrentMonth) {
       cell.classList.add("today");
     }
 
     cell.addEventListener("click", () => {
-      cycleShift(dateKey);
+      openDayModal(dateKey);
     });
 
     cell.appendChild(dayNumberEl);
@@ -455,7 +583,6 @@ function renderCalendar() {
     calendarGridEl.appendChild(cell);
   }
 
-  // Riepilogo mese (giorni per turno)
   const parts = Object.keys(dayCounts).map((id) => {
     const t = findShiftType(id);
     const label = t ? t.short || t.name : id;
@@ -470,19 +597,53 @@ function renderCalendar() {
   drawMonthChart();
 }
 
-// Ruota turno sulle celle del calendario
-function cycleShift(dateKey) {
-  const currentId = shifts[dateKey] || "";
-  const index = SHIFT_ORDER.indexOf(currentId);
-  const nextId = SHIFT_ORDER[(index + 1) % SHIFT_ORDER.length];
+// MODALE GIORNO
 
-  if (!nextId) {
-    delete shifts[dateKey];
-  } else {
-    shifts[dateKey] = nextId;
+function openDayModal(dateKey) {
+  modalDateKey = dateKey;
+  const d = new Date(dateKey);
+  if (dayModalDateLabel) {
+    dayModalDateLabel.textContent = d.toLocaleDateString("it-IT", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
   }
 
+  populateModalShiftSelect();
+  if (dayModalShiftSelect) {
+    const currentShiftId = shifts[dateKey] || "";
+    dayModalShiftSelect.value = currentShiftId;
+  }
+
+  const note = notes[dateKey] || {};
+  if (dayModalTitleInput) dayModalTitleInput.value = note.title || "";
+  if (dayModalTextInput) dayModalTextInput.value = note.text || "";
+
+  if (dayModal) dayModal.classList.add("open");
+}
+
+function closeDayModal() {
+  modalDateKey = null;
+  if (dayModal) dayModal.classList.remove("open");
+}
+
+function saveDayModal() {
+  if (!modalDateKey) return;
+
+  const shiftId = dayModalShiftSelect ? dayModalShiftSelect.value : "";
+  if (shiftId) shifts[modalDateKey] = shiftId;
+  else delete shifts[modalDateKey];
   saveShifts();
+
+  const title = dayModalTitleInput ? dayModalTitleInput.value.trim() : "";
+  const text = dayModalTextInput ? dayModalTextInput.value.trim() : "";
+  if (title || text) notes[modalDateKey] = { title, text };
+  else delete notes[modalDateKey];
+  saveNotes();
+
+  closeDayModal();
   renderCalendar();
 }
 
@@ -510,12 +671,13 @@ function applyWeekShifts() {
   renderCalendar();
 }
 
-// ==================== BACKUP / IMPORT / PDF ====================
+// ==================== BACKUP / IMPORT / PDF CALENDARIO ====================
 
 function exportBackup() {
   const data = {
     shifts,
-    shiftTypes
+    shiftTypes,
+    notes
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: "application/json"
@@ -544,11 +706,16 @@ function importBackup() {
       if (data.shifts && typeof data.shifts === "object") {
         shifts = data.shifts;
       }
+      if (data.notes && typeof data.notes === "object") {
+        notes = data.notes;
+      }
       saveShiftTypes();
       saveShifts();
+      saveNotes();
       buildShiftOrder();
       renderShiftTypes();
       populateWeekSelect();
+      populateModalShiftSelect();
       renderCalendar();
       alert("Backup importato correttamente.");
     } catch (err) {
@@ -571,12 +738,14 @@ function printPdf() {
     const type = shiftId ? findShiftType(shiftId) : null;
     const name = type ? type.name : "";
     const hours = type ? type.hours || "" : "";
+    const note = notes[key];
 
     rowsHtml += `<tr>
       <td style="padding:4px 8px;border:1px solid #ddd;">${day}</td>
       <td style="padding:4px 8px;border:1px solid #ddd;">${key}</td>
       <td style="padding:4px 8px;border:1px solid #ddd;">${name}</td>
       <td style="padding:4px 8px;border:1px solid #ddd;">${hours}</td>
+      <td style="padding:4px 8px;border:1px solid #ddd;">${note && note.title ? note.title : ""}</td>
     </tr>`;
   }
 
@@ -598,6 +767,7 @@ function printPdf() {
               <th style="padding:4px 8px;border:1px solid #ddd;">Data</th>
               <th style="padding:4px 8px;border:1px solid #ddd;">Turno</th>
               <th style="padding:4px 8px;border:1px solid #ddd;">Orario</th>
+              <th style="padding:4px 8px;border:1px solid #ddd;">Nota</th>
             </tr>
           </thead>
           <tbody>
@@ -620,110 +790,4 @@ function getMonthStats(year, month) {
   const perType = {};
   let totalHours = 0;
 
-  for (let day = 1; day <= daysInMonth; day++) {
-    const d = new Date(year, month, day);
-    const key = formatDateKey(d);
-    const shiftId = shifts[key];
-    if (!shiftId) continue;
-    const type = findShiftType(shiftId);
-    if (!type) continue;
-
-    const hoursPerDay = parseHoursToDecimal(type.hours);
-    if (!perType[shiftId]) {
-      perType[shiftId] = {
-        type,
-        days: 0,
-        hours: 0
-      };
-    }
-    perType[shiftId].days += 1;
-    perType[shiftId].hours += hoursPerDay;
-    totalHours += hoursPerDay;
-  }
-
-  return { perType, totalHours };
-}
-
-function parseHoursToDecimal(hoursStr) {
-  if (!hoursStr) return 0;
-  const m = hoursStr.match(
-    /(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/
-  );
-  if (!m) return 0;
-  const start =
-    parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
-  let end = parseInt(m[3], 10) * 60 + parseInt(m[4], 10);
-  if (end <= start) {
-    end += 24 * 60; // passa la mezzanotte
-  }
-  return (end - start) / 60;
-}
-
-function updateHoursSummary() {
-  if (!hoursSummaryEl) return;
-  const { perType, totalHours } = getMonthStats(
-    currentYear,
-    currentMonth
-  );
-  const entries = Object.values(perType);
-  if (!entries.length) {
-    hoursSummaryEl.textContent =
-      "Nessuna ora lavorata per questo mese.";
-    return;
-  }
-  const parts = entries.map((e) => {
-    const label = e.type.short || e.type.name;
-    return `${label}: ${e.hours.toFixed(1)} h (${e.days} gg)`;
-  });
-  hoursSummaryEl.textContent =
-    `Ore totali mese: ${totalHours.toFixed(1)} h — ` +
-    parts.join(" • ");
-}
-
-function drawMonthChart() {
-  if (!chartCanvas || !chartCanvas.getContext) return;
-  const ctx = chartCanvas.getContext("2d");
-  const { perType } = getMonthStats(currentYear, currentMonth);
-  const entries = Object.values(perType);
-
-  ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
-
-  if (!entries.length) return;
-
-  const padding = 20;
-  const width = chartCanvas.width;
-  const height = chartCanvas.height;
-  const barWidth =
-    (width - padding * 2) / Math.max(entries.length, 1);
-
-  const maxHours = Math.max(...entries.map((e) => e.hours), 1);
-  const usableHeight = height - padding * 2 - 16;
-
-  entries.forEach((e, index) => {
-    const x =
-      padding + index * barWidth + barWidth * 0.1;
-    const barH = (e.hours / maxHours) * usableHeight;
-    const y = height - padding - barH;
-
-    ctx.fillStyle = e.type.color || "#4b5563";
-    ctx.fillRect(x, y, barWidth * 0.8, barH);
-
-    ctx.fillStyle = "#111827";
-    ctx.font = "10px system-ui";
-    ctx.textAlign = "center";
-    ctx.fillText(
-      e.type.short || e.type.name,
-      x + barWidth * 0.4,
-      height - 6
-    );
-  });
-}
-
-// ==================== UTILITÀ ====================
-
-function formatDateKey(dateObj) {
-  const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const d = String(dateObj.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+  for (let day = 1; day <= daysInMonth; day
