@@ -6,9 +6,12 @@
     font-family: Arial, sans-serif;
 }
 
+/* Corpo centrato per mobile: niente zoom */
 body {
     background: #eef1f5;
     color: #222;
+    max-width: 480px;
+    margin: 0 auto;
 }
 
 /* ====== HEADER ====== */
@@ -49,8 +52,8 @@ body {
 .calendar-card {
     background: white;
     border-radius: 16px;
-    margin: 15px;
-    padding: 15px;
+    margin: 10px 8px;
+    padding: 12px;
     box-shadow: 0 2px 6px #0002;
 }
 
@@ -77,51 +80,53 @@ body {
     font-weight: bold;
     text-align: center;
     color: #666;
+    font-size: 12px;
 }
 
 /* ====== CALENDAR GRID ====== */
 .calendar-grid {
-    margin-top: 10px;
+    margin-top: 8px;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 5px;
 }
 
 .day {
     background: #f3f7ff;
-    padding: 8px;
-    min-height: 75px;
+    padding: 5px;
+    min-height: 68px;
     border-radius: 12px;
     position: relative;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .day .number {
     font-weight: bold;
+    font-size: 13px;
 }
 
 .day .title {
-    font-size: 12px;
+    font-size: 11px;
     color: #333;
     margin-top: 2px;
 }
 
 .day .note-btn {
     position: absolute;
-    bottom: 4px;
-    right: 4px;
-    font-size: 14px;
-    opacity: 0.75;
+    bottom: 3px;
+    right: 3px;
+    font-size: 13px;
+    opacity: 0.7;
 }
 
 /* ====== SHIFT BADGE ====== */
 .shift-badge {
     display: inline-block;
-    padding: 4px 8px;
+    padding: 3px 6px;
     border-radius: 8px;
-    margin-top: 5px;
-    font-size: 13px;
+    margin-top: 4px;
+    font-size: 11px;
     font-weight: bold;
     color: white;
 }
@@ -164,6 +169,7 @@ body {
     color: white;
     border-radius: 10px;
     width: 100%;
+    margin-top: 10px;
 }
 
 .btn-secondary {
@@ -171,13 +177,15 @@ body {
     border: none;
     padding: 10px;
     border-radius: 10px;
+    margin-top: 8px;
 }
 
-/* IMPAGINAZIONE */
+/* IMPAGINAZIONE FORM */
 label {
     font-weight: bold;
     margin-top: 10px;
     display: block;
+    font-size: 14px;
 }
 
 input, select, textarea {
@@ -186,6 +194,7 @@ input, select, textarea {
     border-radius: 10px;
     border: 1px solid #ccc;
     margin-top: 5px;
+    font-size: 14px;
 }
 
 /* Righe lista turni */
