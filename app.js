@@ -14,6 +14,11 @@ let SHIFT_ORDER = [""];
 
 // ==================== ELEMENTI DOM ====================
 
+// TAB / PAGINE
+const tabButtons = document.querySelectorAll(".tab-btn");
+const pageCalendar = document.getElementById("page-calendar");
+const pageSettings = document.getElementById("page-settings");
+
 // Calendario
 const monthNameEl = document.getElementById("month-name");
 const yearNumberEl = document.getElementById("year-number");
@@ -58,6 +63,9 @@ let currentMonth; // 0-11
 // ==================== INIZIALIZZAZIONE ====================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Tab navigation
+  setupTabs();
+
   loadShiftTypes();
   buildShiftOrder();
   loadShifts();
@@ -105,6 +113,30 @@ document.addEventListener("DOMContentLoaded", () => {
   populateWeekSelect();
   renderCalendar();
 });
+
+// ==================== TABS ====================
+
+function setupTabs() {
+  function showPage(name) {
+    // pulsanti
+    tabButtons.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.page === name);
+    });
+    // pagine
+    pageCalendar.classList.toggle("active", name === "calendar");
+    pageSettings.classList.toggle("active", name === "settings");
+  }
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const page = btn.dataset.page;
+      showPage(page);
+    });
+  });
+
+  // pagina di default
+  showPage("calendar");
+}
 
 // ==================== TIPI DI TURNO ====================
 
