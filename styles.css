@@ -225,10 +225,92 @@ body {
   background: #cdecc4;
 }
 
+/* Form inserimento settimanale */
+
+.week-form {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.week-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+}
+
+.week-form-row label {
+  color: #374151;
+}
+
+.week-form-row input,
+.week-form-row select {
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  outline: none;
+  background: #f9fafb;
+}
+
+.week-form-row input:focus,
+.week-form-row select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  background: #ffffff;
+}
+
+.week-form-actions {
+  margin-top: 0.15rem;
+}
+
+/* Bottoni generici */
+
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: transform 0.08s, box-shadow 0.08s, background-color 0.08s;
+}
+
+.btn.primary {
+  background: #1976d2;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+}
+
+.btn.primary:hover {
+  background: #1565c0;
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
 .info-text {
   font-size: 0.8rem;
   color: #6b7280;
   line-height: 1.4;
+  margin-top: 0.3rem;
+}
+
+.info-text.small {
+  font-size: 0.75rem;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0.6rem 0;
 }
 
 .app-footer {
