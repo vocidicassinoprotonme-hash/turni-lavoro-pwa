@@ -87,7 +87,7 @@
       </section>
     </div>
 
-    <!-- PAGINA 2: IMPOSTAZIONI / TURNI -->
+    <!-- PAGINA 2: IMPOSTAZIONI / TURNI / GUADAGNI -->
     <div id="page-settings" class="page">
       <section class="card">
         <h2>Turni disponibili</h2>
@@ -120,13 +120,12 @@
         </form>
 
         <p class="info-text">
-          Tocca una casella del calendario per cambiare il turno del giorno.
-          La rotazione segue l'ordine dei turni in elenco.
+          Tocca una casella del calendario (nella pagina Calendario) per modificare il turno del giorno e aggiungere una nota evento.
         </p>
 
         <hr class="divider" />
 
-        <h2>Backup & PDF</h2>
+        <h2>Backup & PDF calendario</h2>
         <div class="backup-buttons">
           <button id="export-json" class="btn secondary">Esporta backup (.json)</button>
           <button id="import-json-btn" class="btn secondary">Importa backup</button>
@@ -134,6 +133,25 @@
         </div>
         <div class="backup-buttons">
           <button id="print-pdf" class="btn primary">Stampa / Salva PDF mese</button>
+        </div>
+
+        <hr class="divider" />
+
+        <h2>Guadagni (da busta paga)</h2>
+        <div class="earnings-section">
+          <div class="earn-row">
+            <label for="hourly-pay">Retribuzione oraria (€ / h)</label>
+            <input type="number" id="hourly-pay" min="0" step="0.01" />
+          </div>
+          <div class="earn-row">
+            <label for="payroll-pdf">Carica PDF busta paga</label>
+            <input type="file" id="payroll-pdf" accept="application/pdf" />
+          </div>
+          <p class="info-text small">
+            Il PDF deve essere il modello standard (come quello che hai caricato): l'app legge le righe
+            “Ore Retribuite” e “Ore Lavorate Ecc.” e calcola le ore totali e il guadagno stimato.
+          </p>
+          <div id="earnings-summary" class="earnings-summary info-text"></div>
         </div>
       </section>
     </div>
@@ -143,7 +161,39 @@
     Turni di lavoro • PWA personale
   </footer>
 
+  <!-- pdf.js per lettura busta paga -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <!-- JS principale -->
   <script src="./app.js"></script>
+
+  <!-- MODALE GIORNO (note + turno) -->
+  <div id="day-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header-title" id="day-modal-date"></div>
+      <div class="modal-header-sub">
+        Imposta il turno del giorno e aggiungi una nota evento.
+      </div>
+
+      <div class="modal-row">
+        <label for="day-modal-shift">Turno</label>
+        <select id="day-modal-shift"></select>
+      </div>
+
+      <div class="modal-row">
+        <label for="day-modal-title">Titolo nota (mostrato sul calendario)</label>
+        <input id="day-modal-title" maxlength="40" />
+      </div>
+
+      <div class="modal-row">
+        <label for="day-modal-text">Dettagli (facoltativi)</label>
+        <textarea id="day-modal-text" placeholder="Es. visita medica, permesso, straordinario..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button id="day-modal-cancel" class="btn ghost">Annulla</button>
+        <button id="day-modal-save" class="btn primary">Salva</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
