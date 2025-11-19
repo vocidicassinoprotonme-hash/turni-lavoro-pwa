@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Turni di lavoro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1976d2" />
+
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+
+  <!-- Icone base (puoi sostituirle con le tue) -->
+  <link rel="icon" type="image/png" href="./icons/icon-192.png" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Turni di lavoro</h1>
+    <p class="subtitle">Gestisci i tuoi turni in modo semplice</p>
+  </header>
+
+  <main class="app-main">
+    <section class="card">
+      <h2>Aggiungi / Modifica turno</h2>
+      <form id="shift-form">
+        <input type="hidden" id="shift-id" />
+
+        <div class="form-row">
+          <label for="date">Data</label>
+          <input type="date" id="date" required />
+        </div>
+
+        <div class="form-row">
+          <label for="start">Ora inizio</label>
+          <input type="time" id="start" required />
+        </div>
+
+        <div class="form-row">
+          <label for="end">Ora fine</label>
+          <input type="time" id="end" required />
+        </div>
+
+        <div class="form-row">
+          <label for="type">Tipo turno</label>
+          <select id="type">
+            <option value="Mattina">Mattina</option>
+            <option value="Pomeriggio">Pomeriggio</option>
+            <option value="Notte">Notte</option>
+            <option value="Straordinario">Straordinario</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="notes">Note (opzionale)</label>
+          <textarea id="notes" rows="2" placeholder="Es: reparto, macchina, collega..."></textarea>
+        </div>
+
+        <div class="buttons-row">
+          <button type="submit" class="btn primary">Salva turno</button>
+          <button type="button" id="reset-btn" class="btn secondary">Pulisci</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="list-header">
+        <h2>Turni registrati</h2>
+        <button id="clear-all" class="btn danger small">Cancella tutti</button>
+      </div>
+      <div class="info-text">
+        I turni sono salvati solo su questo dispositivo (localStorage).
+      </div>
+      <ul id="shifts-list" class="shifts-list">
+        <!-- Turni generati da JavaScript -->
+      </ul>
+      <div id="empty-message" class="empty-message">
+        Nessun turno inserito.<br />
+        Compila il form sopra e premi <strong>Salva turno</strong>.
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Turni di lavoro - PWA</span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
