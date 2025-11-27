@@ -37,7 +37,7 @@ function getShiftIcon(id) {
     return SHIFT_ICONS[id] || "";
 }
 
-// ---- Riferimenti DOM (potrebbero essere null, quindi useremo controlli) ----
+// ---- Riferimenti DOM ----
 const tabCalBtn          = document.getElementById("tab-cal");
 const tabSetBtn          = document.getElementById("tab-settings");
 const pageCal            = document.getElementById("page-calendario");
@@ -396,12 +396,12 @@ function renderCalendar() {
         }
 
         const noteBtn = document.createElement("div");
-        noteBtn.className = "note-btn";
-        noteBtn.textContent = "📝";
-        noteBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            openNotePopup(dateKey);
-        });
+            noteBtn.className = "note-btn";
+            noteBtn.textContent = "📝";
+            noteBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                openNotePopup(dateKey);
+            });
 
         cell.addEventListener("click", () => {
             cycleShift(dateKey);
@@ -784,32 +784,34 @@ function updateHoursForPay(hours) {
  - Libero = 0 €
 */
 function calcPay() {
-    if (!hourlyRateEl || !contractHoursEl || !payResultEl) return;
+    // servono almeno retribuzione oraria e box di output
+    if (!hourlyRateEl || !payResultEl) return;
 
     saveRate();
-    saveContractHours();
+    if (contractHoursEl) saveContractHours();
 
     const rate = parseFloat((hourlyRateEl.value || "").replace(",", "."));
-    const manual = manualHoursEl
-        ? parseFloat((manualHoursEl.value || "").replace(",", "."))
-        : NaN;
-    const contractH = parseFloat((contractHoursEl.value || "").replace(",", "."));
-    const bonus2 = bonusSecondEl
-        ? parseFloat((bonusSecondEl.value || "").replace(",", ".")) || 0
-        : 0;
-    const bonus3 = bonusThirdEl
-        ? parseFloat((bonusThirdEl.value || "").replace(",", ".")) || 0
-        : 0;
-    const dedPerc = deductionsEl
-        ? parseFloat((deductionsEl.value || "").replace(",", ".")) || 0
-        : 0;
-
-    const calendarH = currentCalendarHours || 0;
-
     if (isNaN(rate) || rate <= 0) {
         payResultEl.textContent = "Inserisci una retribuzione oraria valida.";
         return;
     }
+
+    const manual = manualHoursEl
+        ? parseFloat((manualHoursEl.value || "").replace(",", ".")) : NaN;
+
+    let contractH = 0;
+    if (contractHoursEl && contractHoursEl.value) {
+        contractH = parseFloat((contractHoursEl.value || "").replace(",", "."));
+    }
+
+    const bonus2 = bonusSecondEl
+        ? parseFloat((bonusSecondEl.value || "").replace(",", ".")) || 0 : 0;
+    const bonus3 = bonusThirdEl
+        ? parseFloat((bonusThirdEl.value || "").replace(",", ".")) || 0 : 0;
+    const dedPerc = deductionsEl
+        ? parseFloat((deductionsEl.value || "").replace(",", ".")) || 0 : 0;
+
+    const calendarH = currentCalendarHours || 0;
 
     const stats = getMonthStats(currentYear, currentMonth);
     const perId = stats.perId || {};
@@ -832,12 +834,19 @@ function calcPay() {
 
     const totalGrossCalendar = baseGross + secondGross + thirdGross + restGross;
 
-    let baseHoursForCedolino = (!isNaN(contractH) && contractH > 0)
-        ? contractH : calendarH;
-    let descrHoursBase = "Ore contrattuali mese";
+    // ore di riferimento per il cedolino
+    let baseHoursForCedolino;
+    let descrHoursBase;
+
     if (!isNaN(manual) && manual > 0) {
         baseHoursForCedolino = manual;
         descrHoursBase = "Ore manuali inserite";
+    } else if (!isNaN(contractH) && contractH > 0) {
+        baseHoursForCedolino = contractH;
+        descrHoursBase = "Ore contrattuali mese";
+    } else {
+        baseHoursForCedolino = calendarH;
+        descrHoursBase = "Ore da calendario";
     }
 
     const grossCedolino = baseHoursForCedolino * rate;
