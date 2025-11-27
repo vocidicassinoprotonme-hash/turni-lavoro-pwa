@@ -162,14 +162,14 @@ function switchPage(which) {
 // ====== SHIFT TYPES ======
 function getDefaultShiftTypes() {
     return [
-        { id: "MATT",  short: "Matt",   name: "Mattina",    hours: "06:00-14:00", color: "#ff8f8f" },
-        { id: "POME",  short: "Pome",   name: "Pomeriggio", hours: "14:00-22:00", color: "#ffb36b" },
-        { id: "NOTTE", short: "Notte",  name: "Notte",      hours: "22:00-06:00", color: "#7f8cff" },
-        { id: "LIB",   short: "Libero", name: "Riposo",     hours: "",            color: "#7fd49b" },
-        { id: "FER",   short: "Ferie",  name: "Ferie",      hours: "",            color: "#d78cff" },
-        { id: "MUT",   short: "Mutua",  name: "Mutua",      hours: "",            color: "#8fd1ff" },
-        { id: "PAR",   short: "PAR",    name: "PAR",        hours: "",            color: "#aecbff" },
-        { id: "PS",    short: "P.S.",   name: "P.S.",       hours: "",            color: "#b6f5c2" }
+        { id: "MATT",  short: "Matt",   name: "Mattina",    hours: "06:00-14:00", color: "#f97373" },
+        { id: "POME",  short: "Pome",   name: "Pomeriggio", hours: "14:00-22:00", color: "#fb923c" },
+        { id: "NOTTE", short: "Notte",  name: "Notte",      hours: "22:00-06:00", color: "#6366f1" },
+        { id: "LIB",   short: "Libero", name: "Riposo",     hours: "",            color: "#22c55e" },
+        { id: "FER",   short: "Ferie",  name: "Ferie",      hours: "",            color: "#e879f9" },
+        { id: "MUT",   short: "Mutua",  name: "Mutua",      hours: "",            color: "#38bdf8" },
+        { id: "PAR",   short: "PAR",    name: "PAR",        hours: "",            color: "#a5b4fc" },
+        { id: "PS",    short: "P.S.",   name: "P.S.",       hours: "",            color: "#4ade80" }
     ];
 }
 
@@ -230,7 +230,7 @@ function addNewShiftType() {
     const short = (shiftShortEl.value || "").trim();
     const name = (shiftNameEl.value || "").trim();
     const hours = (shiftHoursEl.value || "").trim();
-    const color = shiftColorEl.value || "#ff9999";
+    const color = shiftColorEl.value || "#f97373";
 
     if (!short || !name) {
         alert("Inserisci almeno sigla e nome turno.");
@@ -256,7 +256,7 @@ function addNewShiftType() {
     shiftShortEl.value = "";
     shiftNameEl.value = "";
     shiftHoursEl.value = "";
-    shiftColorEl.value = "#ff9999";
+    shiftColorEl.value = "#f97373";
 }
 
 function populateWeekShiftSelect() {
@@ -397,18 +397,12 @@ function renderCalendar() {
         calendarGridEl.appendChild(div);
     }
 
-    const pieces = Object.keys(dayCounts).map(id => {
-        const t = findShiftType(id);
-        const label = t ? (t.short || t.name) : id;
-        return `${label}: ${dayCounts[id]} gg`;
-    });
-
-    if (pieces.length === 0) {
+    const stats = getMonthStats(currentYear, currentMonth);
+    if (!stats.entries.length) {
         hoursSummaryEl.textContent = "Nessun turno assegnato per questo mese.";
         drawMonthChart({ entries: [], totalHours: 0 });
         updateHoursForPay(0);
     } else {
-        const stats = getMonthStats(currentYear, currentMonth);
         const parts = stats.entries.map(e => {
             return `${e.label}: ${e.hours.toFixed(1)} h (${e.days} gg)`;
         });
@@ -665,6 +659,12 @@ function getMonthStats(year, month) {
 
 function drawMonthChart(stats) {
     if (!chartCanvas || !chartCanvas.getContext) return;
+
+    // adattiamo il canvas alla larghezza del contenitore per evitare zoom
+    const parentWidth = chartCanvas.parentElement.clientWidth || 360;
+    chartCanvas.width = parentWidth;
+    chartCanvas.height = 180;
+
     const ctx = chartCanvas.getContext("2d");
     ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
 
@@ -673,10 +673,10 @@ function drawMonthChart(stats) {
 
     const w = chartCanvas.width;
     const h = chartCanvas.height;
-    const padding = 20;
+    const padding = 24;
     const barWidth = (w - padding * 2) / entries.length;
     const maxHours = Math.max(...entries.map(e => e.hours), 1);
-    const usableH = h - padding * 2 - 16;
+    const usableH = h - padding * 2 - 18;
 
     const rate = parseFloat((hourlyRateEl.value || "").replace(",", ".")) || 0;
 
@@ -691,10 +691,10 @@ function drawMonthChart(stats) {
         ctx.fillStyle = e.color;
         ctx.fillRect(x, y, barWidth * 0.8, barH);
 
-        ctx.fillStyle = "#222";
-        ctx.font = "10px Arial";
+        ctx.fillStyle = "#111827";
+        ctx.font = "10px system-ui";
         ctx.textAlign = "center";
-        ctx.fillText(e.label, x + barWidth * 0.4, h - 5);
+        ctx.fillText(e.label, x + barWidth * 0.4, h - 6);
 
         if (rate > 0 && e.hours > 0) {
             const pay = rate * e.hours;
