@@ -293,10 +293,14 @@ textarea {
     margin-bottom: 6px;
 }
 
-/* ===== CHART ===== */
+/* ===== CHART AREA ===== */
 .chart-wrapper {
     width: 100%;
-    margin-top: 6px;
+    margin-top: 8px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 8px 6px 4px;
+    box-shadow: 0 2px 6px #0001;
 }
 
 #month-chart {
@@ -305,8 +309,16 @@ textarea {
     display: block;
 }
 
-/* Testi info */
-#hours-summary,
+/* Testi info riepilogo */
+#hours-summary {
+    font-size: 13.5px;
+    color: #111827;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    white-space: pre-line;   /* permette \n per righe separate */
+}
+
 #calendar-hours-info,
 #pay-result {
     font-size: 13px;
