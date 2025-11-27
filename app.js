@@ -37,6 +37,20 @@ function getShiftIcon(id) {
     return SHIFT_ICONS[id] || "";
 }
 
+// Moltiplicatori economici di base
+// (possono essere “spinti” via campi di impostazione)
+const BASE_SHIFT_MULTIPLIERS = {
+    MATT: 1.00,   // mattina 100%
+    POME: 1.207,  // pomeriggio 120,7% (busta paga 2T 20,70%)
+    NOTTE: 1.50,  // notte 150% (valore di default, modificabile)
+    LIB:  0.00,   // riposo: 0 €
+    FER:  1.00,   // ferie 100%
+    MUT:  1.00,   // mutua 100% (semplificato)
+    PAR:  1.00,   // PAR
+    PS:   1.00,   // P.S.
+    CIGO: 0.58    // CIGO ≈ 58% della paga oraria (da cedolini)
+};
+
 // ---- Riferimenti DOM ----
 const tabCalBtn          = document.getElementById("tab-cal");
 const tabSetBtn          = document.getElementById("tab-settings");
@@ -359,7 +373,7 @@ function renderCalendar() {
             continue;
         }
 
-        const dayNum = i - firstWeekday + 1;
+        const dayNum  = i - firstWeekday + 1;
         const dateObj = new Date(currentYear, currentMonth, dayNum);
         const dateKey = formatDateKey(dateObj);
 
@@ -396,12 +410,12 @@ function renderCalendar() {
         }
 
         const noteBtn = document.createElement("div");
-            noteBtn.className = "note-btn";
-            noteBtn.textContent = "📝";
-            noteBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                openNotePopup(dateKey);
-            });
+        noteBtn.className = "note-btn";
+        noteBtn.textContent = "📝";
+        noteBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openNotePopup(dateKey);
+        });
 
         cell.addEventListener("click", () => {
             cycleShift(dateKey);
@@ -433,12 +447,10 @@ function renderCalendar() {
 
         const rate       = parseFloat((hourlyRateEl && hourlyRateEl.value || "").replace(",", ".")) || 0;
         const totalHours = stats.totalHours;
-        const basePay    = rate > 0 ? totalHours * rate : 0;
 
         const line1 =
             `Totale mese: ${totalHours.toFixed(1)} h • ` +
-            `${workingDays} gg lavorati, ${restDays} gg riposo` +
-            (rate > 0 ? ` • Stima compenso base: € ${basePay.toFixed(2)}` : "");
+            `${workingDays} gg lavorati, ${restDays} gg riposo`;
 
         const dettaglio = stats.entries.map(e => {
             const icon = getShiftIcon(e.id);
@@ -777,14 +789,17 @@ function updateHoursForPay(hours) {
 }
 
 /*
- Stima:
- - base (Matt, Fer, Mut, Par, Ps, Cigo) = 100%
- - Pome = base + maggiorazione 2° turno
- - Notte = base + maggiorazione 3° turno
- - Libero = 0 €
+ Stima stipendio:
+
+ - Usa paga oraria (12,99) e ore dei turni del calendario.
+ - Pomeriggio = 120,7% (o valore impostato nel campo "2° turno").
+ - Notte = 150% (o valore impostato nel campo "3° turno").
+ - CIGO = 58% della paga oraria (da busta paga).
+ - Libero = 0 €.
+ - Netti stimati applicando una percentuale di trattenute
+   (default 26% -> netto ≈74% del lordo, ricavato dai tuoi cedolini).
 */
 function calcPay() {
-    // servono almeno retribuzione oraria e box di output
     if (!hourlyRateEl || !payResultEl) return;
 
     saveRate();
@@ -796,6 +811,7 @@ function calcPay() {
         return;
     }
 
+    // Input opzionali
     const manual = manualHoursEl
         ? parseFloat((manualHoursEl.value || "").replace(",", ".")) : NaN;
 
@@ -804,13 +820,19 @@ function calcPay() {
         contractH = parseFloat((contractHoursEl.value || "").replace(",", "."));
     }
 
-    const bonus2 = bonusSecondEl
-        ? parseFloat((bonusSecondEl.value || "").replace(",", ".")) || 0 : 0;
-    const bonus3 = bonusThirdEl
-        ? parseFloat((bonusThirdEl.value || "").replace(",", ".")) || 0 : 0;
-    const dedPerc = deductionsEl
-        ? parseFloat((deductionsEl.value || "").replace(",", ".")) || 0 : 0;
+    let percSecond = bonusSecondEl
+        ? parseFloat((bonusSecondEl.value || "").replace(",", ".")) : NaN;
+    if (isNaN(percSecond)) percSecond = 20.7; // da busta paga
 
+    let percThird = bonusThirdEl
+        ? parseFloat((bonusThirdEl.value || "").replace(",", ".")) : NaN;
+    if (isNaN(percThird)) percThird = 50;     // valore di default
+
+    let dedPerc = deductionsEl
+        ? parseFloat((deductionsEl.value || "").replace(",", ".")) : NaN;
+    if (isNaN(dedPerc) || dedPerc <= 0) dedPerc = 26; // ≈74% netto
+
+    const netFactor = 1 - dedPerc / 100;
     const calendarH = currentCalendarHours || 0;
 
     const stats = getMonthStats(currentYear, currentMonth);
@@ -826,15 +848,33 @@ function calcPay() {
     const hPs    = perId.PS    ? perId.PS.hours    : 0;
     const hCigo  = perId.CIGO  ? perId.CIGO.hours  : 0;
 
-    const baseHours = hMatt + hFer + hMut + hPar + hPs + hCigo;
-    const baseGross = baseHours * rate;
-    const secondGross = hPome * rate * (1 + bonus2 / 100);
-    const thirdGross  = hNotte * rate * (1 + bonus3 / 100);
-    const restGross   = hLib * 0;
+    const multMatt  = BASE_SHIFT_MULTIPLIERS.MATT;
+    const multFer   = BASE_SHIFT_MULTIPLIERS.FER;
+    const multMut   = BASE_SHIFT_MULTIPLIERS.MUT;
+    const multPar   = BASE_SHIFT_MULTIPLIERS.PAR;
+    const multPs    = BASE_SHIFT_MULTIPLIERS.PS;
+    const multCigo  = BASE_SHIFT_MULTIPLIERS.CIGO;
+    const multLib   = BASE_SHIFT_MULTIPLIERS.LIB;
 
-    const totalGrossCalendar = baseGross + secondGross + thirdGross + restGross;
+    const multPome  = 1 + percSecond / 100;
+    const multNotte = 1 + percThird / 100;
 
-    // ore di riferimento per il cedolino
+    const grossMatt  = hMatt  * rate * multMatt;
+    const grossPome  = hPome  * rate * multPome;
+    const grossNotte = hNotte * rate * multNotte;
+    const grossFer   = hFer   * rate * multFer;
+    const grossMut   = hMut   * rate * multMut;
+    const grossPar   = hPar   * rate * multPar;
+    const grossPs    = hPs    * rate * multPs;
+    const grossCigo  = hCigo  * rate * multCigo;
+    const grossLib   = hLib   * rate * multLib; // comunque 0
+
+    const totalGrossCalendar =
+        grossMatt + grossPome + grossNotte +
+        grossFer + grossMut + grossPar + grossPs +
+        grossCigo + grossLib;
+
+    // Ore base per "cedolino" (contratto)
     let baseHoursForCedolino;
     let descrHoursBase;
 
@@ -850,8 +890,8 @@ function calcPay() {
     }
 
     const grossCedolino = baseHoursForCedolino * rate;
-    const netCedolino   = grossCedolino * (1 - dedPerc / 100);
-    const netCalendar   = totalGrossCalendar * (1 - dedPerc / 100);
+    const netCedolino   = grossCedolino * netFactor;
+    const netCalendar   = totalGrossCalendar * netFactor;
     const diffNet       = netCalendar - netCedolino;
 
     payResultEl.textContent =
@@ -859,7 +899,12 @@ function calcPay() {
         `Lordo base: € ${grossCedolino.toFixed(2)} • Netto base (≈${(100 - dedPerc).toFixed(1)}%): € ${netCedolino.toFixed(2)}\n` +
         `Stima su turni del calendario: lordo ≈ € ${totalGrossCalendar.toFixed(2)} • netto ≈ € ${netCalendar.toFixed(2)} ` +
         `(differenza vs base: ${diffNet >= 0 ? "+" : ""}€${diffNet.toFixed(2)})\n` +
-        `Dettaglio (lordo mese): Matt/Ferie/Mutua/Par/P.S./Cigo ≈ € ${baseGross.toFixed(2)} • 2° turno ≈ € ${secondGross.toFixed(2)} • 3° turno ≈ € ${thirdGross.toFixed(2)} • Riposi: € 0`;
+        `Dettaglio lordo mese:\n` +
+        `• Matt/Ferie/Mutua/PAR/P.S. ≈ € ${(grossMatt + grossFer + grossMut + grossPar + grossPs).toFixed(2)}\n` +
+        `• 2° turno (Pome, ${percSecond.toFixed(1)}%) ≈ € ${grossPome.toFixed(2)}\n` +
+        `• 3° turno (Notte, ${percThird.toFixed(1)}%) ≈ € ${grossNotte.toFixed(2)}\n` +
+        `• CIGO (≈58% paga oraria) ≈ € ${grossCigo.toFixed(2)}\n` +
+        `• Riposi: € ${grossLib.toFixed(2)}`;
 }
 
 // ======================
