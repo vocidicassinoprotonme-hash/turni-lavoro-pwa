@@ -6,7 +6,7 @@
     font-family: Arial, sans-serif;
 }
 
-/* Corpo centrato per mobile: niente zoom */
+/* Corpo centrato per mobile */
 body {
     background: #eef1f5;
     color: #222;
@@ -180,7 +180,7 @@ body {
     margin-top: 8px;
 }
 
-/* IMPAGINAZIONE FORM */
+/* Moduli */
 label {
     font-weight: bold;
     margin-top: 10px;
