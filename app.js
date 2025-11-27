@@ -46,6 +46,7 @@ const nextMonthBtn = document.getElementById("next-month");
 
 const weekForm = document.getElementById("week-form");
 const weekStartEl = document.getElementById("week-start");
+const weekEndEl = document.getElementById("week-end");
 const weekShiftEl = document.getElementById("week-shift");
 
 const hoursSummaryEl = document.getElementById("hours-summary");
@@ -106,8 +107,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (weekStartEl) {
         weekStartEl.value = formatDateKey(today);
     }
+    if (weekEndEl) {
+        const end = new Date(today);
+        end.setDate(today.getDate() + 6);
+        weekEndEl.value = formatDateKey(end);
+    }
 
-    // Form settimana
+    // Form periodo
     weekForm.addEventListener("submit", (e) => {
         e.preventDefault();
         applyWeekShifts();
@@ -470,9 +476,10 @@ function deleteNoteFromPopup() {
     renderCalendar();
 }
 
-// ====== SETTIMANA ======
+// ====== INSERIMENTO PERIODO ======
 function applyWeekShifts() {
     const startStr = weekStartEl.value;
+    let endStr = weekEndEl.value;
     const shiftId = weekShiftEl.value;
 
     if (!startStr || !shiftId) {
@@ -481,12 +488,39 @@ function applyWeekShifts() {
     }
 
     const startDate = new Date(startStr);
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(startDate);
-        d.setDate(startDate.getDate() + i);
+
+    // se l'utente non mette la data fine, usiamo +6 giorni
+    let endDate;
+    if (endStr) {
+        endDate = new Date(endStr);
+    } else {
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        if (weekEndEl) {
+            weekEndEl.value = formatDateKey(endDate);
+        }
+    }
+
+    if (endDate < startDate) {
+        alert("La data fine non può essere precedente alla data di inizio.");
+        return;
+    }
+
+    // limite di sicurezza: max 40 giorni
+    const diffMs = endDate - startDate;
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    if (diffDays > 40) {
+        alert("Il periodo è troppo lungo (max ~40 giorni).");
+        return;
+    }
+
+    const d = new Date(startDate);
+    while (d <= endDate) {
         const key = formatDateKey(d);
         shifts[key] = shiftId;
+        d.setDate(d.getDate() + 1);
     }
+
     saveShifts();
     renderCalendar();
 }
@@ -712,7 +746,6 @@ function updateHoursForPay(hours) {
  * - POME = base + maggiorazione 2° turno
  * - NOTTE = base + maggiorazione 3° turno
  * - LIB = 0 €
- * - tutte le trattenute vengono applicate come % unica sul lordo
  */
 function calcPay() {
     saveRate();
