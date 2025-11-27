@@ -16,156 +16,161 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div class="app">
 
-<header class="main-header">
-    <h1>Turni di lavoro</h1>
-    <p>Calendario turni personale</p>
+    <header class="main-header">
+        <h1>Turni di lavoro</h1>
+        <p>Calendario turni personale</p>
 
-    <div class="tabs">
-        <button id="tab-cal" class="active">Calendario</button>
-        <button id="tab-settings">Impostazioni</button>
-    </div>
-</header>
+        <div class="tabs">
+            <button id="tab-cal" class="active">Calendario</button>
+            <button id="tab-settings">Impostazioni</button>
+        </div>
+    </header>
 
-<!-- PAGINA CALENDARIO -->
-<main id="page-calendario">
+    <!-- PAGINA CALENDARIO -->
+    <main id="page-calendario">
 
-    <section class="calendar-card">
-        <div class="month-nav">
-            <button id="prev-month" class="nav-btn">❮</button>
-            <div class="month-label">
-                <span id="month-name"></span>
-                <span id="year-number"></span>
+        <section class="calendar-card">
+            <div class="month-nav">
+                <button id="prev-month" class="nav-btn">❮</button>
+                <div class="month-label">
+                    <span id="month-name"></span>
+                    <span id="year-number"></span>
+                </div>
+                <button id="next-month" class="nav-btn">❯</button>
             </div>
-            <button id="next-month" class="nav-btn">❯</button>
-        </div>
 
-        <div class="weekdays-row">
-            <div>LUN</div>
-            <div>MAR</div>
-            <div>MER</div>
-            <div>GIO</div>
-            <div>VEN</div>
-            <div>SAB</div>
-            <div>DOM</div>
-        </div>
+            <div class="weekdays-row">
+                <div>LUN</div>
+                <div>MAR</div>
+                <div>MER</div>
+                <div>GIO</div>
+                <div>VEN</div>
+                <div>SAB</div>
+                <div>DOM</div>
+            </div>
 
-        <div id="calendar-grid" class="calendar-grid">
-            <!-- celle create da app.js -->
-        </div>
-    </section>
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- celle create da app.js -->
+            </div>
+        </section>
 
-    <section class="card">
-        <h2>Inserimento multiplo</h2>
+        <section class="card">
+            <h2>Inserimento multiplo</h2>
 
-        <form id="week-form">
-            <label>Data inizio periodo</label>
-            <input type="date" id="week-start">
+            <form id="week-form">
+                <label>Data inizio periodo</label>
+                <input type="date" id="week-start">
 
-            <label>Data fine periodo</label>
-            <input type="date" id="week-end">
+                <label>Data fine periodo</label>
+                <input type="date" id="week-end">
 
-            <label>Turno da applicare (da inizio a fine)</label>
-            <select id="week-shift"></select>
+                <label>Turno da applicare (da inizio a fine)</label>
+                <select id="week-shift"></select>
 
-            <button type="submit" class="btn-primary">Applica al periodo</button>
-        </form>
-    </section>
+                <button type="submit" class="btn-primary">Applica al periodo</button>
+            </form>
+        </section>
 
-    <section class="card">
-        <h2>Riepilogo ore & grafico</h2>
-        <p id="hours-summary"></p>
-        <canvas id="month-chart" width="360" height="180"></canvas>
-    </section>
+        <section class="card">
+            <h2>Riepilogo ore & grafico</h2>
+            <p id="hours-summary"></p>
+            <div class="chart-wrapper">
+                <canvas id="month-chart"></canvas>
+            </div>
+        </section>
 
-</main>
+    </main>
 
-<!-- PAGINA IMPOSTAZIONI -->
-<main id="page-settings" style="display:none;">
+    <!-- PAGINA IMPOSTAZIONI -->
+    <main id="page-settings" style="display:none;">
 
-    <section class="card">
-        <h2>Turni disponibili</h2>
-        <div id="shift-types-list"></div>
-    </section>
+        <section class="card">
+            <h2>Turni disponibili</h2>
+            <div id="shift-types-list"></div>
+        </section>
 
-    <section class="card">
-        <h2>Crea un nuovo turno</h2>
+        <section class="card">
+            <h2>Crea un nuovo turno</h2>
 
-        <form id="shift-type-form">
-            <label>Sigla breve</label>
-            <input id="shift-short" placeholder="Es. Matt">
+            <form id="shift-type-form">
+                <label>Sigla breve</label>
+                <input id="shift-short" placeholder="Es. Matt">
 
-            <label>Nome turno</label>
-            <input id="shift-name" placeholder="Es. Mattina">
+                <label>Nome turno</label>
+                <input id="shift-name" placeholder="Es. Mattina">
 
-            <label>Orario</label>
-            <input id="shift-hours" placeholder="Es. 06:00-14:00">
+                <label>Orario</label>
+                <input id="shift-hours" placeholder="Es. 06:00-14:00">
 
-            <label>Colore</label>
-            <input type="color" id="shift-color" value="#ff9999">
+                <label>Colore</label>
+                <input type="color" id="shift-color" value="#ff9999">
 
-            <button type="submit" class="btn-secondary">Aggiungi turno</button>
-        </form>
-    </section>
+                <button type="submit" class="btn-secondary">Aggiungi turno</button>
+            </form>
+        </section>
 
-    <section class="card">
-        <h2>Backup & PDF</h2>
+        <section class="card">
+            <h2>Backup & PDF</h2>
 
-        <button id="export-json" class="btn-secondary">Esporta backup</button>
-        <button id="import-json-btn" class="btn-secondary">Importa backup</button>
-        <input type="file" id="import-json-file" accept="application/json" hidden>
+            <button id="export-json" class="btn-secondary">Esporta backup</button>
+            <button id="import-json-btn" class="btn-secondary">Importa backup</button>
+            <input type="file" id="import-json-file" accept="application/json" hidden>
 
-        <button id="print-pdf" class="btn-primary">Stampa/Salva PDF</button>
-    </section>
+            <button id="print-pdf" class="btn-primary">Stampa/Salva PDF</button>
+        </section>
 
-    <section class="card">
-        <h2>Calcolo guadagni</h2>
+        <section class="card">
+            <h2>Calcolo guadagni</h2>
 
-        <p id="calendar-hours-info"></p>
+            <p id="calendar-hours-info"></p>
 
-        <label>Retribuzione oraria (€)</label>
-        <input id="hourly-rate" type="number" step="0.01" value="12.99">
+            <label>Retribuzione oraria (€)</label>
+            <input id="hourly-rate" type="number" step="0.01" value="12.99">
 
-        <label>Ore contrattuali mese</label>
-        <input id="contract-hours" type="number" value="173">
+            <label>Ore contrattuali mese</label>
+            <input id="contract-hours" type="number" value="173">
 
-        <label>Maggiorazione 2° turno (%)</label>
-        <input id="bonus-second" type="number" step="0.1" value="20.7">
+            <label>Maggiorazione 2° turno (%)</label>
+            <input id="bonus-second" type="number" step="0.1" value="20.7">
 
-        <label>Maggiorazione 3° turno (%)</label>
-        <input id="bonus-third" type="number" step="0.1" value="30">
+            <label>Maggiorazione 3° turno (%)</label>
+            <input id="bonus-third" type="number" step="0.1" value="30">
 
-        <label>Trattenute complessive (INPS, IRPEF, ecc.) (%)</label>
-        <input id="deductions-perc" type="number" step="0.1" value="30">
+            <label>Trattenute complessive (INPS, IRPEF, ecc.) (%)</label>
+            <input id="deductions-perc" type="number" step="0.1" value="30">
 
-        <label>Ore manuali (opzionale)</label>
-        <input id="manual-hours" type="number" placeholder="Es. 173">
+            <label>Ore manuali (opzionale)</label>
+            <input id="manual-hours" type="number" placeholder="Es. 173">
 
-        <button id="calc-pay" class="btn-primary">Calcola guadagni</button>
+            <button id="calc-pay" class="btn-primary">Calcola guadagni</button>
 
-        <p id="pay-result"></p>
-    </section>
+            <p id="pay-result"></p>
+        </section>
 
-</main>
+    </main>
 
-<!-- POPUP NOTA GIORNO -->
-<div id="note-popup" class="popup hidden">
-    <div class="popup-content">
-        <h3>Nota del giorno</h3>
+    <!-- POPUP NOTA GIORNO -->
+    <div id="note-popup" class="popup hidden">
+        <div class="popup-content">
+            <h3>Nota del giorno</h3>
 
-        <label>Titolo</label>
-        <input id="note-title">
+            <label>Titolo</label>
+            <input id="note-title">
 
-        <label>Dettagli</label>
-        <textarea id="note-text"></textarea>
+            <label>Dettagli</label>
+            <textarea id="note-text"></textarea>
 
-        <div class="popup-buttons">
-            <button id="popup-cancel" class="btn-secondary">Annulla</button>
-            <button id="popup-delete" class="btn-secondary">Elimina</button>
-            <button id="popup-save" class="btn-primary">Salva</button>
+            <div class="popup-buttons">
+                <button id="popup-cancel" class="btn-secondary">Annulla</button>
+                <button id="popup-delete" class="btn-secondary">Elimina</button>
+                <button id="popup-save" class="btn-primary">Salva</button>
+            </div>
         </div>
     </div>
-</div>
+
+</div><!-- /.app -->
 
 <script src="app.js"></script>
 </body>
