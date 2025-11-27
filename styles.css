@@ -3,58 +3,90 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* Corpo centrato per mobile */
+/* Sfondo generale */
 body {
-    background: #eef1f5;
-    color: #222;
+    margin: 0;
+    background: radial-gradient(circle at top, #1b77e6 0, #0b1020 45%, #020617 100%);
+    color: #111827;
+}
+
+/* Contenitore app, centrato e responsivo */
+.app {
     max-width: 480px;
     margin: 0 auto;
+    min-height: 100vh;
+    background: #eef1f5;
+    box-shadow: 0 0 40px #0005;
 }
 
 /* ====== HEADER ====== */
 .main-header {
     text-align: center;
-    padding: 15px;
-    background: #1b77e6;
+    padding: 18px 12px 12px;
+    background: linear-gradient(135deg, #1b77e6, #2563eb, #38bdf8);
     color: #fff;
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    box-shadow: 0 6px 18px #0b112080;
 }
 
+.main-header h1 {
+    font-size: 22px;
+    letter-spacing: 0.02em;
+}
+
+.main-header p {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-top: 3px;
+}
+
+/* Tabs */
 .tabs {
-    margin-top: 15px;
+    margin-top: 14px;
     display: flex;
     justify-content: center;
-    background: #dce8f7;
-    border-radius: 25px;
-    padding: 5px;
+    background: #dbeafe;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
 }
 
 .tabs button {
     flex: 1;
-    padding: 10px;
+    padding: 8px 6px;
     border: none;
     background: transparent;
-    border-radius: 20px;
-    font-size: 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    color: #1e293b;
 }
 
 .tabs button.active {
-    background: white;
-    font-weight: bold;
+    background: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 6px #0002;
 }
 
 /* ====== CARD ====== */
 .card,
 .calendar-card {
-    background: white;
-    border-radius: 16px;
-    margin: 10px 8px;
-    padding: 12px;
-    box-shadow: 0 2px 6px #0002;
+    background: #f9fafb;
+    border-radius: 18px;
+    margin: 12px 10px;
+    padding: 12px 12px 14px;
+    box-shadow: 0 4px 10px #0001;
+    border: 1px solid #e5e7eb;
+}
+
+.card h2,
+.calendar-card h2 {
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: #111827;
 }
 
 /* ====== MONTH NAV ====== */
@@ -62,86 +94,119 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 8px;
+}
+
+.month-label {
+    text-align: center;
+}
+
+#month-name {
+    display: block;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+#year-number {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
 }
 
 .nav-btn {
     background: #1b77e6;
     border: none;
-    padding: 7px 12px;
+    padding: 6px 10px;
     color: white;
-    border-radius: 8px;
+    border-radius: 999px;
+    font-size: 16px;
+    box-shadow: 0 2px 6px #0003;
 }
 
 /* ====== WEEKDAYS ====== */
 .weekdays-row {
-    margin-top: 10px;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    font-weight: bold;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    font-weight: 600;
     text-align: center;
-    color: #666;
-    font-size: 12px;
+    color: #6b7280;
+    font-size: 11px;
+    margin-bottom: 4px;
 }
 
 /* ====== CALENDAR GRID ====== */
 .calendar-grid {
-    margin-top: 8px;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
 }
 
+/* Singolo giorno */
 .day {
-    background: #f3f7ff;
-    padding: 5px;
-    min-height: 68px;
+    background: #f3f4f6;
+    padding: 4px;
     border-radius: 12px;
+    min-height: 64px;
     position: relative;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    overflow: hidden;
+}
+
+.day:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px #0002;
+    background: #e5f0ff;
 }
 
 .day .number {
-    font-weight: bold;
-    font-size: 13px;
+    font-weight: 700;
+    font-size: 12px;
+    color: #111827;
 }
 
+/* Titolo nota */
 .day .title {
-    font-size: 11px;
-    color: #333;
+    font-size: 10px;
+    color: #4b5563;
     margin-top: 2px;
 }
 
+/* Icona nota */
 .day .note-btn {
     position: absolute;
-    bottom: 3px;
-    right: 3px;
+    bottom: 2px;
+    right: 2px;
     font-size: 13px;
-    opacity: 0.7;
+    opacity: 0.8;
 }
 
-/* ====== SHIFT BADGE ====== */
+/* Badge turno */
 .shift-badge {
-    display: inline-block;
-    padding: 3px 6px;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 5px;
+    border-radius: 999px;
     margin-top: 4px;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 10px;
+    font-weight: 600;
     color: white;
+    box-shadow: 0 1px 3px #0003;
+    max-width: 100%;
+    white-space: nowrap;
 }
 
 /* ====== POPUP NOTA ====== */
 .popup {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: #0008;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 999;
 }
 
 .popup.hidden {
@@ -149,52 +214,75 @@ body {
 }
 
 .popup-content {
-    background: white;
-    width: 90%;
-    padding: 20px;
-    border-radius: 15px;
+    background: #f9fafb;
+    width: 92%;
+    max-width: 420px;
+    padding: 18px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px #0006;
+    border: 1px solid #e5e7eb;
+}
+
+.popup-content h3 {
+    margin-bottom: 8px;
+    font-size: 16px;
 }
 
 .popup-buttons {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    gap: 8px;
+    margin-top: 14px;
 }
 
 /* ===== BUTTONS ===== */
 .btn-primary {
-    background: #1b77e6;
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
     border: none;
     padding: 10px;
     color: white;
-    border-radius: 10px;
+    border-radius: 999px;
     width: 100%;
     margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 3px 10px #2563eb66;
 }
 
 .btn-secondary {
-    background: #e0e0e0;
+    background: #e5e7eb;
     border: none;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 9px;
+    border-radius: 999px;
     margin-top: 8px;
+    font-size: 13px;
+    flex: 1;
 }
 
 /* Moduli */
 label {
-    font-weight: bold;
+    font-weight: 600;
     margin-top: 10px;
     display: block;
-    font-size: 14px;
+    font-size: 13px;
+    color: #374151;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
     width: 100%;
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    margin-top: 5px;
-    font-size: 14px;
+    padding: 8px 9px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    margin-top: 4px;
+    font-size: 13px;
+    background: #ffffff;
+}
+
+textarea {
+    min-height: 70px;
+    resize: vertical;
 }
 
 /* Righe lista turni */
@@ -203,4 +291,26 @@ input, select, textarea {
     align-items: center;
     gap: 8px;
     margin-bottom: 6px;
+}
+
+/* ===== CHART ===== */
+.chart-wrapper {
+    width: 100%;
+    margin-top: 6px;
+}
+
+#month-chart {
+    width: 100%;
+    height: 180px;
+    display: block;
+}
+
+/* Testi info */
+#hours-summary,
+#calendar-hours-info,
+#pay-result {
+    font-size: 13px;
+    color: #111827;
+    margin-top: 4px;
+    white-space: pre-line;
 }
